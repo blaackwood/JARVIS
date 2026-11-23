@@ -37,13 +37,33 @@ The Stockfish binary and source are not redistributed here. tools/stockfish/
 contains attribution and the GPL-3.0 licence notice for the separately
 downloaded engine. Download it from https://stockfishchess.org/download/.
 
-## Python, Node.js and operating-system dependencies
+## Windows installer runtime
 
-requirements.txt and _jarvis_agent_ui/desktop/package.json declare
-dependencies installed by users from their package registries. They retain
-their own upstream licences and notices; consult their package metadata and
-official project repositories. No virtual environment, Node modules, or
-compiled runtime bundle is included.
+The Windows x64 installer contains a Python 3.13 runtime, application
+dependencies declared in requirements.txt, and executables packaged with
+PyInstaller. Upstream package metadata and licence files are retained in the
+installed runtime where supplied by the respective distributions. The Python
+runtime licence is included as PYTHON-LICENSE.txt. PyInstaller's COPYING
+exception text and the PyInstaller hooks-contrib licence are included as
+PYINSTALLER-COPYING.txt and PYINSTALLER-HOOKS-CONTRIB-LICENSE.txt.
+
+The installer also contains Playwright's Chromium Headless Shell for local
+browser QA. Its upstream combined third-party licence and notices are kept
+inside the ms-playwright/chromium_headless_shell-<revision>/
+chrome-headless-shell-win64/ directory as LICENSE.headless_shell. Playwright's
+own licence and notices are copied as PLAYWRIGHT-LICENSE.txt,
+PLAYWRIGHT-NOTICE and PLAYWRIGHT-THIRDPARTYNOTICES.TXT when present in the
+installed distribution. These are third-party components, not JARVIS-authored
+code.
+
+Interactive browser automation uses a browser already installed by the user
+(such as Chrome, Edge or Firefox); browser profiles are not copied into the
+installer. The separate Electron JARVIS Agent shell is not bundled.
+
+For source installations, requirements.txt and
+_jarvis_agent_ui/desktop/package.json declare packages installed by users
+from their respective package registries. They retain their own licences and
+notices; consult package metadata and official project repositories.
 
 ## Optional services
 

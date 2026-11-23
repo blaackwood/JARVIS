@@ -14,6 +14,15 @@ _install_no_console_policy()
 # down on startup. Reconfiguring to UTF-8 with a replacement fallback costs
 # nothing and makes the app launch the same way in every locale.
 import sys as _sys
+import os as _os
+from pathlib import Path as _Path
+
+# Packaged releases carry a private Playwright Chromium runtime beside the app.
+# Keep browser automation independent from Python installs and user cache paths.
+if getattr(_sys, "frozen", False):
+    _bundled_browsers = _Path(_sys.executable).resolve().parent / "ms-playwright"
+    if _bundled_browsers.is_dir():
+        _os.environ["PLAYWRIGHT_BROWSERS_PATH"] = str(_bundled_browsers)
 
 for _stream in ("stdout", "stderr"):
     try:

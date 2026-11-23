@@ -35,16 +35,11 @@ Name: "{app}\reports"
 
 [Files]
 Source: "package\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\config\jarvis.ico"; DestDir: "{app}\config"; Flags: ignoreversion
-; Intentionally excluded: config\api_keys.json, memory contents, histories, reports, task state and local credentials.
+; User credentials, config/api_keys.json, memory, histories and task state are never bundled.
 
 [Icons]
 Name: "{autoprograms}\JARVIS"; Filename: "{app}\JARVIS.exe"; WorkingDir: "{app}"
-Name: "{autodesktop}\JARVIS"; Filename: "{app}\JARVIS.exe"; Workingdir: "{app}"; Tasks: desktopicon
-
-[Registry]
-; Inicia o JARVIS com o Windows para manter o Hey Jarvis disponivel apos o login.
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "JARVIS_AI"; ValueData: """{app}\JARVIS-Wake.exe"""; Flags: uninsdeletevalue
+Name: "{autodesktop}\JARVIS"; Filename: "{app}\JARVIS.exe"; WorkingDir: "{app}"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\JARVIS.exe"; Description: "Iniciar JARVIS"; Flags: postinstall nowait skipifsilent

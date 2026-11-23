@@ -49,6 +49,8 @@ installer_build/dist/
 installer_build/work/
 installer_build/package/
 installer_build/release/
+installer_build/browser-store/
+installer_build/headless-test/
 *.exe
 *.dll
 *.pyd

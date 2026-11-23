@@ -1,13 +1,49 @@
-# Installation guide
+# JARVIS installation guide
 
-## Requirements
+## Windows installer (recommended)
 
-- Python 3.11 to 3.13 (3.13 is the tested target).
-- Git.
-- Windows 10/11 for the complete desktop-control workflow. macOS/Linux
-  dependency markers are supported, but OS-specific tools differ.
-- Microphone and speakers/headphones for voice conversation.
-- Internet access for Gemini Live, web search and browser automation.
+The supported one-click installer is for **Windows 10/11 x64**.
+
+1. Download JARVIS-Setup.exe from [GitHub Releases](https://github.com/blaackwood/JARVIS/releases/latest).
+2. Run it. Installation is per-user and does not require administrator privileges.
+3. Launch JARVIS from the Start Menu shortcut.
+4. On first launch, enter your own Gemini API key and validate it.
+
+The installer bundles the Python runtime and application dependencies. Python
+and Git are not required on the target computer. It does not turn on wake-word
+listening or register a Windows auto-start entry; both remain optional settings
+controlled from the app.
+
+The installer is not code-signed yet. Windows SmartScreen may show an
+unrecognized-app warning. Only obtain it from the official GitHub Releases
+page linked above.
+
+## Requirements and hardware
+
+- Windows 10/11, 64-bit, for the packaged installer.
+- Internet access for Gemini Live, web services and browser automation.
+- A microphone and speakers/headphones for voice conversation.
+- A dedicated GPU is not required for the basic software-rendered holographic
+  avatar. Advanced 3D experiences depend on the graphics hardware and drivers.
+- A tested minimum RAM requirement has not yet been established.
+- The installer bundles Chromium Headless Shell for local browser QA.
+  Interactive browser control launches your own installed Chrome, Edge or
+  Firefox; browser profiles are not copied into the installer.
+
+macOS/Linux users can install from source; the packaged installer is Windows
+only.
+
+## First-run API configuration
+
+JARVIS requires the user's own Gemini API key. Create one in
+[Google AI Studio](https://aistudio.google.com/apikey), start the app, paste
+the key into the setup field and validate it. The first-run gate does not
+accept a blank key. Selecting an alternate/local provider later does not
+erase the key required for initial provisioning.
+
+The key is written to config/api_keys.json. The file is excluded by Git,
+but this implementation stores it in plain text. Protect your operating
+system account and never share or commit that file.
 
 ## Install from source
 
@@ -17,7 +53,7 @@
 git clone https://github.com/blaackwood/JARVIS.git
 cd JARVIS
 py -3.13 -m venv .venv
-.\.venv\Scripts\Activate.ps1
+.\\.venv\\Scripts\\Activate.ps1
 $env:PYTHONUTF8 = "1"
 python setup.py
 python main.py
@@ -43,16 +79,6 @@ be retried with:
 python -m playwright install chromium firefox
 ~~~
 
-## First-run API configuration
-
-JARVIS requires the user's own Gemini API key. Create one in Google AI Studio,
-start the app, paste the key into the protected setup field, and validate it.
-The first-run gate does not accept a blank key. Selecting an alternate/local provider later does not erase the key required for initial provisioning.
-
-The key is written to config/api_keys.json. The file is excluded by Git,
-but the current implementation stores it in plain text. Protect your operating
-system account and never share or commit that file.
-
 ## Optional capabilities
 
 ### Stockfish chess engine
@@ -74,13 +100,13 @@ in with your own eligible account. Neither CLI nor its credentials is bundled.
 The local web workbench can be started from the repository root with:
 
 ~~~powershell
-.\.venv\Scripts\python.exe _jarvis_agent_ui\server.py
+.\\.venv\\Scripts\\python.exe _jarvis_agent_ui\\server.py
 ~~~
 
 For the Electron wrapper, install Node.js, then run:
 
 ~~~powershell
-cd _jarvis_agent_ui\desktop
+cd _jarvis_agent_ui\\desktop
 npm install
 npm start
 ~~~
@@ -92,8 +118,8 @@ locally under _jarvis_agent_ui/data/; that folder is ignored by Git.
 ### Local wake word
 
 The Hey JARVIS listener is opt-in. Enable it in JARVIS settings and allow the
-application to download the model/runtime. The native C++ daemon is an optional
-Windows-only build; see wake_native/README.md.
+application to download the model/runtime. The optional wake daemon is built
+for Windows; see wake_native/README.md for the native alternative.
 
 ### Remote dashboard
 
@@ -131,7 +157,7 @@ python tools/jarvis_browser_qa.py --check
 Run browser QA against a web project:
 
 ~~~powershell
-python tools/jarvis_browser_qa.py --project-dir C:\path\to\your\web-project
+python tools/jarvis_browser_qa.py --project-dir C:\\path\\to\\your\\web-project
 ~~~
 
 The runner only starts recognized local development servers on 127.0.0.1,

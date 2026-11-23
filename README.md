@@ -1,11 +1,18 @@
 # JARVIS
 
-**A desktop AI assistant created by blaackwood.**
+**Windows 10/11 · 64-bit · v0.1.0**
+
+**[Download the JARVIS Windows installer](https://github.com/blaackwood/JARVIS/releases/latest/download/JARVIS-Setup.exe)** · [All releases](https://github.com/blaackwood/JARVIS/releases)
+
+**A personal desktop assistant created by blaackwood.**
+
+The Windows installer bundles the application runtime and dependencies.
+You **do not need to install Python or Git** to use this release.
 
 Português: [README.pt-BR.md](README.pt-BR.md)
 
-JARVIS is a local-first desktop assistant with a holographic interface, live
-voice conversation, computer and browser control, specialized actions, coding
+JARVIS is a desktop assistant with a holographic interface, live voice
+conversation, computer and browser control, specialized actions, coding
 workflows, persistent memory, scheduled tasks, visual lessons, and optional
 remote integrations.
 
@@ -13,20 +20,57 @@ The main conversation engine is Google Gemini Live. Every installation must
 use the installing user's own Gemini API key. No developer key, personal
 memory, conversation archive, or local account configuration is included.
 
-> JARVIS is a desktop application, not a hosted SaaS service. Capabilities
-> depend on the operating system, local permissions, optional dependencies,
-> and external accounts the user chooses to configure.
+## See JARVIS in action
 
-## See it in action
+The following short captures show the actual 3D lesson renderer running inside
+JARVIS. They demonstrate the solar-system and atom scenes; voice interaction is
+shown separately in the desktop interface screenshot.
 
 <p align="center">
-  <img src="docs/media/demo-solar-system.gif" alt="JARVIS 3D visual lesson: the solar system with orbiting planets, moon and labels" width="49%">
-  <img src="docs/media/demo-atom.gif" alt="JARVIS 3D visual lesson: atom with nucleus and orbiting electrons" width="49%">
+  <img src="docs/media/demo-solar-system.gif" alt="JARVIS 3D solar system lesson" width="49%">
+  <img src="docs/media/demo-atom.gif" alt="JARVIS 3D atom lesson" width="49%">
 </p>
 
-<p align="center"><em>Interactive 3D lessons rendered by JARVIS's own holographic visual
-board (captured from the real renderer). Ask for any topic and JARVIS builds the
-scene while it explains; drag to rotate, press ESC to clear.</em></p>
+<p align="center">
+  <img src="docs/media/screenshot-main.png" alt="JARVIS holographic desktop interface" width="100%">
+</p>
+
+<p align="center">
+  <img src="docs/media/screenshot-solar-system.png" alt="JARVIS solar system 3D lesson screenshot" width="49%">
+  <img src="docs/media/screenshot-atom.png" alt="JARVIS atom 3D lesson screenshot" width="49%">
+</p>
+
+## Requirements
+
+- Windows 10 or 11, 64-bit.
+- Internet access and your own Gemini API key for live voice conversation.
+- A microphone and speakers/headphones for voice features.
+- The basic holographic avatar is software-rendered and does not require a
+  dedicated GPU. Advanced 3D experiences depend on graphics hardware and
+  drivers.
+- The Chromium Headless Shell used by browser QA is included in the installer.
+  Interactive browsing control requires Chrome, Edge, or Firefox installed on
+  Windows.
+- A validated minimum RAM requirement has not yet been established, so we do
+  not publish an unsupported number.
+
+The installer is for Windows x64 only. macOS and Linux users can install from
+source using the instructions in INSTALLATION.md.
+
+## Install on Windows
+
+1. Download JARVIS-Setup.exe using the link at the top of this page.
+2. Run the installer. It installs JARVIS under your user profile and does not
+   require administrator privileges.
+3. Launch JARVIS from the shortcut.
+4. On first launch, enter and validate your own Gemini API key.
+
+Create or manage your key in
+[Google AI Studio](https://aistudio.google.com/apikey). JARVIS unlocks the main
+interface only after Google accepts the key.
+
+The installer does not enable wake-word listening or configure JARVIS to start
+with Windows. Those options remain under the user's control in app settings.
 
 ## What JARVIS can do
 
@@ -55,31 +99,22 @@ scene while it explains; drag to rotate, press ESC to clear.</em></p>
 The complete action catalogue is in FEATURES.md. Skill origins and licence
 status are in SKILLS.md.
 
-## First run: your own Gemini API key
+## Security and privacy — quick summary
 
-1. Install Python 3.11 to 3.13 (Python 3.13 is the tested target) and Git.
-2. Clone this repository and enter its directory.
-3. Create a virtual environment, install requirements, and run JARVIS:
+- JARVIS can interact with files, applications, the mouse, keyboard and browser.
+- Sensitive operations use authorization controls and confirmation prompts;
+  review an operation before approving it.
+- Do not run JARVIS as administrator unless a specific feature genuinely
+  requires it.
+- Wake-word listening and Windows auto-start are optional and are not enabled
+  by the installer.
+- JARVIS is not offline-only: voice audio is sent to Gemini; files and screen
+  or camera content may be sent to the active provider when you request those
+  features.
 
-   ~~~powershell
-   py -3.13 -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   $env:PYTHONUTF8 = "1"
-   python setup.py
-   python main.py
-   ~~~
-
-4. On first launch, the setup screen asks for your own Gemini API key.
-   Create one in Google AI Studio (https://aistudio.google.com/apikey),
-   paste it into JARVIS, and validate it. The main interface stays locked
-   until Google accepts the key.
-
-The key is saved locally in config/api_keys.json. It is ignored by Git, but
-the current configuration implementation stores it as plain text. Protect
-your operating-system account and never share or commit that file. API usage
-and any charges belong to your own Google account.
-
-See INSTALLATION.md for optional components and troubleshooting.
+The key is stored in config/api_keys.json and this version keeps it in plain
+text inside your installation. Protect your Windows account and never share
+that file. See SECURITY.md for details.
 
 ## Optional components
 
@@ -95,28 +130,10 @@ See INSTALLATION.md for optional components and troubleshooting.
 - **Other providers and services:** configure each provider's own key or
   account in JARVIS settings.
 
-## Privacy and security
+## Source installation and development
 
-JARVIS runs desktop tools locally, but it is not offline-only. Live voice
-conversation uses Google's Gemini service. The file processor sends the file
-the user explicitly selects to the configured Gemini model for analysis.
-Other cloud providers and integrations receive the data needed for the
-operation the user requests.
-
-JARVIS includes authorization checks and confirmation gates for sensitive
-operations. Review SECURITY.md before enabling desktop automation or external
-integrations.
-
-No API keys, user memory, chat histories, task queues, private project data,
-logs, screenshots, or local provider configuration are part of this source
-distribution.
-
-## Platforms
-
-The setup script supports Windows, macOS, and Linux dependency markers, but
-OS-specific functions differ. The complete desktop workflow and installer are
-primarily developed for Windows 10/11. The native wake daemon and Windows UI
-Automation path are Windows-only.
+To install from source, use macOS/Linux, or contribute to the project, see
+INSTALLATION.md. This route requires Python 3.11–3.13, Git and dependency setup.
 
 ## Licensing and attribution
 
@@ -128,3 +145,5 @@ Automation path are Windows-only.
   their pinned commit are reference-only and are not copied here.
 
 The JARVIS MIT licence does not relicense any third-party component.
+
+Version history: [CHANGELOG.md](CHANGELOG.md).
