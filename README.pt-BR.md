@@ -14,6 +14,17 @@ ser configurada com a chave de API Gemini do próprio usuário. Este repositóri
 não contém a chave do desenvolvedor, memória pessoal, histórico de conversas
 ou configurações privadas da instalação original.
 
+## Veja em ação
+
+<p align="center">
+  <img src="docs/media/demo-solar-system.gif" alt="Aula visual 3D do JARVIS: sistema solar com planetas, lua e rótulos em órbita" width="49%">
+  <img src="docs/media/demo-atom.gif" alt="Aula visual 3D do JARVIS: átomo com núcleo e elétrons em órbita" width="49%">
+</p>
+
+<p align="center"><em>Aulas 3D interativas renderizadas pelo quadro visual holográfico do
+próprio JARVIS (capturadas do renderizador real). Peça qualquer assunto e o JARVIS
+monta a cena enquanto explica; arraste para girar e use ESC para limpar.</em></p>
+
 ## Funcionalidades
 
 - **Voz e conversa:** conversas ao vivo, respostas faladas, seleção de voz e

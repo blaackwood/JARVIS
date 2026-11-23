@@ -17,6 +17,17 @@ memory, conversation archive, or local account configuration is included.
 > depend on the operating system, local permissions, optional dependencies,
 > and external accounts the user chooses to configure.
 
+## See it in action
+
+<p align="center">
+  <img src="docs/media/demo-solar-system.gif" alt="JARVIS 3D visual lesson: the solar system with orbiting planets, moon and labels" width="49%">
+  <img src="docs/media/demo-atom.gif" alt="JARVIS 3D visual lesson: atom with nucleus and orbiting electrons" width="49%">
+</p>
+
+<p align="center"><em>Interactive 3D lessons rendered by JARVIS's own holographic visual
+board (captured from the real renderer). Ask for any topic and JARVIS builds the
+scene while it explains; drag to rotate, press ESC to clear.</em></p>
+
 ## What JARVIS can do
 
 - **Talk and listen:** live voice conversations, spoken responses, configurable
