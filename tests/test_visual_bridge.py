@@ -5,6 +5,38 @@ from types import SimpleNamespace
 
 from ui import JarvisUI
 
+def model_scene(label="Cena", x=2, y=3):
+    """Fixture de cena 3D válida: cinco corpos rotulados e conexões entre eles."""
+    names = ("Núcleo", "Entrada", "Processo", "Saída", "Energia")
+    offsets = ((0, 0, 0), (-28, -12, 0), (28, -12, 2), (-16, 25, 5), (18, 26, -4))
+    shapes = ("sphere", "cube", "cylinder", "cone", "torus")
+    parts = [
+        {
+            "id": f"part-{i}",
+            "shape": shapes[i],
+            "size": 18 if i == 0 else 10 + i,
+            "dx": offsets[i][0],
+            "dy": offsets[i][1],
+            "dz": offsets[i][2],
+            "label": f"{label} {names[i]}",
+        }
+        for i in range(5)
+    ]
+    return {
+        "type": "model3d",
+        "x": x,
+        "y": y,
+        "width": 62,
+        "height": 88,
+        "shape": "none",
+        "parts": parts,
+        "links": [
+            {"from": "part-0", "to": f"part-{i}", "flow": True}
+            for i in range(1, 5)
+        ],
+    }
+
+
 
 class _StatusSignal:
     def __init__(self):
@@ -316,28 +348,14 @@ class ContinuousLessonTests(unittest.IsolatedAsyncioTestCase):
             "Agora escolha qual é a fonte de energia da fotossíntese.",
         ]
         elements = [
-            [{"type": "polygon", "color": "green", "fill": True, "stroke_width": 4,
-              "points": [{"x": 45, "y": 55}, {"x": 40, "y": 35}, {"x": 55, "y": 17},
-                         {"x": 64, "y": 40}, {"x": 56, "y": 58}]},
-             {"type": "text", "x": 45, "y": 63, "width": 15, "text": "Folha"}],
-            [{"type": "circle", "x": 15, "y": 15, "radius": 10, "color": "amber", "fill": True},
-             {"type": "arrow", "x": 24, "y": 19, "x2": 42, "y2": 32, "color": "amber"},
-             {"type": "text", "x": 8, "y": 31, "width": 20, "text": "Energia solar", "color": "amber"}],
-            [{"type": "polyline", "color": "blue", "points": [
-                {"x": 33, "y": 92}, {"x": 45, "y": 82}, {"x": 53, "y": 92}]},
-             {"type": "arrow", "x": 45, "y": 80, "x2": 48, "y2": 58, "color": "blue"},
-             {"type": "text", "x": 15, "y": 82, "width": 20, "text": "Água · H₂O", "color": "blue"}],
-            [{"type": "arrow", "x": 19, "y": 54, "x2": 40, "y2": 46, "color": "cyan"},
-             {"type": "text", "x": 4, "y": 50, "width": 30, "text": "Gás carbônico · CO₂"}],
-            [{"type": "circle", "x": 49, "y": 35, "radius": 3, "color": "green", "fill": True},
-             {"type": "circle", "x": 55, "y": 43, "radius": 3, "color": "green", "fill": True},
-             {"type": "text", "x": 43, "y": 5, "width": 25, "text": "Clorofila", "color": "green"}],
-            [{"type": "arrow", "x": 65, "y": 32, "x2": 77, "y2": 24, "color": "green"},
-             {"type": "text", "x": 78, "y": 18, "width": 21, "text": "Oxigênio · O₂", "color": "green"},
-             {"type": "arrow", "x": 63, "y": 49, "x2": 77, "y2": 48, "color": "pink"},
-             {"type": "formula", "x": 77, "y": 43, "width": 22, "height": 14,
-              "text": "Glicose", "color": "pink"}],
-            [{"type": "quiz", "id": "quiz", "x": 65, "y": 65, "width": 34, "height": 32,
+            [model_scene("Folha"), {"type": "text", "x": 45, "y": 63, "width": 15, "text": "Folha"}],
+            [model_scene("Sol"), {"type": "text", "x": 8, "y": 31, "width": 20, "text": "Energia solar"}],
+            [model_scene("Água"), {"type": "text", "x": 15, "y": 82, "width": 20, "text": "Água · H₂O"}],
+            [model_scene("Ar"), {"type": "text", "x": 4, "y": 50, "width": 30, "text": "Gás carbônico · CO₂"}],
+            [model_scene("Clorofila"), {"type": "text", "x": 43, "y": 5, "width": 25, "text": "Clorofila"}],
+            [model_scene("Produtos"), {"type": "text", "x": 78, "y": 18, "width": 21, "text": "Oxigênio · O₂"},
+             {"type": "formula", "x": 77, "y": 43, "width": 22, "height": 14, "text": "Glicose"}],
+            [model_scene("Quiz"), {"type": "quiz", "id": "quiz", "x": 65, "y": 65, "width": 34, "height": 32,
               "title": "De onde vem a energia?", "options": ["Luz do Sol", "Do solo"],
               "answer": "Luz do Sol", "explanation": "A luz solar fornece a energia da transformação."}],
         ]
@@ -468,7 +486,7 @@ class ContinuousLessonTests(unittest.IsolatedAsyncioTestCase):
             "title": "Fotossíntese",
             "beats": [
                 {"say": "A luz chega à folha.", "elements": [
-                    {"type": "circle", "x": 20, "y": 20, "radius": 4}]},
+                    model_scene("Luz") ]},
                 {"say": "A planta produz glicose.", "elements": [
                     {"type": "text", "text": "Glicose"}]},
             ],

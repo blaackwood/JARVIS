@@ -115,16 +115,23 @@ class CodexWorkspaceModeTests(unittest.TestCase):
         )
         self.assertTrue(all(not item["ok"] for item in emitted))
 
-    def test_local_visual_qa_runner_exists(self):
-        runner = PROJECT_ROOT / ".agents" / "skills" / "jarvis-web-workflow" / "scripts" / "jarvis_web_qa.py"
+    def test_bundled_browser_qa_cli_is_available(self):
+        runner = PROJECT_ROOT / "tools" / "jarvis_browser_qa.py"
         self.assertTrue(runner.is_file(), str(runner))
 
-    def test_web_directive_uses_verified_local_playwright_helper(self):
+    def test_web_quality_skills_are_resolved_from_the_public_release(self):
+        items = codex_agent._web_skill_inputs()
+        names = {item["name"] for item in items}
+        self.assertTrue({"hallmark", "frontend-design", "webapp-testing"}.issubset(names))
+        self.assertNotIn("jarvis-web-workflow", names)
+        self.assertTrue(all(Path(item["path"]).is_file() for item in items))
+
+    def test_web_directive_uses_bundled_playwright_skill(self):
         directive = codex_agent._web_workflow_directive()
-        self.assertIn("jarvis_web_qa.py", directive)
-        self.assertIn("--check", directive)
+        self.assertIn("$webapp-testing", directive)
+        self.assertIn("Playwright", directive)
         self.assertIn("Não presuma que Puppeteer está instalado", directive)
-        self.assertIn("helper Playwright", directive)
+        self.assertIn("capturas desktop/tablet/mobile", directive)
 
     def test_web_visual_review_does_not_stop_after_static_lint_findings(self):
         directive = codex_agent._web_workflow_directive()

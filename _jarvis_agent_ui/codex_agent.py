@@ -86,33 +86,36 @@ def _select_reasoning_effort(model_info, web_task=False):
 
 
 def _web_skill_inputs():
-    """Return the design, Hallmark quality and browser-QA skills for web tasks."""
+    """Return locally bundled, licensed design and browser-QA skills for web tasks."""
     project_root = Path(__file__).resolve().parents[1]
     candidates = (
-        ("jarvis-web-workflow", project_root / ".agents" / "skills" /
-         "jarvis-web-workflow" / "SKILL.md"),
-        ("hallmark", project_root / ".agents" / "skills" /
-         "hallmark" / "SKILL.md"),
-        ("frontend-design", Path.home() / ".agents" / "skills" /
-         "frontend-design" / "SKILL.md"),
-        ("webapp-testing", Path.home() / ".agents" / "skills" /
-         "webapp-testing" / "SKILL.md"),
+        ("hallmark", project_root / ".agents" / "skills" / "hallmark" / "SKILL.md"),
+        ("frontend-design", project_root / ".agents" / "skills" / "frontend-design" / "SKILL.md"),
+        ("webapp-testing", project_root / ".agents" / "skills" / "webapp-testing" / "SKILL.md"),
     )
-    result = []
-    for name, skill_path in candidates:
-        if skill_path.is_file():
-            result.append({"type": "skill", "name": name, "path": str(skill_path)})
-    return result
+    return [
+        {"type": "skill", "name": name, "path": str(skill_path)}
+        for name, skill_path in candidates
+        if skill_path.is_file()
+    ]
 
 
 def _web_workflow_directive():
     project_root = Path(__file__).resolve().parents[1]
-    qa_script = project_root / ".agents" / "skills" / "jarvis-web-workflow" / "scripts" / "jarvis_web_qa.py"
-    qa_check_command = '"%s" "%s" --check' % (str(Path(sys.executable).resolve()), str(qa_script))
+    qa_script = project_root / "tools" / "jarvis_browser_qa.py"
+    python_exe = str(Path(sys.executable).resolve())
+    qa_check_command = '"%s" "%s" --check' % (python_exe, str(qa_script))
+    qa_run_command = '"%s" "%s" --project-dir "<workspace>"' % (python_exe, str(qa_script))
     return (
         "\n\n[PROTOCOLO OBRIGATÓRIO DE CRIAÇÃO WEB — JARVIS WEB EXCELLENCE + HALLMARK / FIRST-PASS QUALITY]\n"
-        "Esta solicitação envolve frontend. Invoque e siga $jarvis-web-workflow e $hallmark; "
+        "Esta solicitação envolve frontend. Invoque e siga $hallmark; "
         "use $frontend-design para direção visual e $webapp-testing para QA real no navegador.\n"
+        "QA PLAYWRIGHT INTEGRADO: antes de depender de automação visual, execute " + qa_check_command +
+        " para verificar Playwright e Chromium. Para auditar o projeto e gerar capturas desktop/mobile, "
+        "execute " + qa_run_command + ". O comando usa core/browser_qa.py, vincula servidores locais "
+        "somente a 127.0.0.1 e salva relatórios/capturas em uma pasta local de evidências. Não instala "
+        "pacotes ou navegadores automaticamente; se o ambiente não estiver pronto, reporte o bloqueio "
+        "e continue com os testes locais que forem seguros.\n"
         "REFERÊNCIA E PREFERÊNCIAS: procure referências fornecidas, decisões anteriores e versões que o usuário já escolheu ou elogiou nesta mesma linha de trabalho. Quando houver uma versão preferida, inspecione capturas e código/design tokens; preserve as preferências já definidas e não peça ao usuário para repeti-las.\n"
         "PAPEL DO HALLMARK: use-o como sistema de direção de arte, escolha de tema, composição, "
         "disciplina do hero e auditoria anti-design-genérico. Leia sua SKILL.md e as referências "
@@ -123,13 +126,12 @@ def _web_workflow_directive():
         "clara, respeite-a em vez de impor um tema sorteado.\n"
         "TEMA E FERRAMENTAS LOCAIS: quando for um novo site/página e não houver design.md ou tema "
         "explicitamente fixado, use theme.mjs deal/draw para explorar uma direção e theme.mjs scaffold "
-        "quando compatível com a arquitetura. Use o caminho instalado em .agents/skills/hallmark. "
-        "Não presuma que Puppeteer está instalado. Antes do build, execute o comando " + qa_check_command +
-        " para confirmar Playwright e navegador. Para capturas, use o mesmo comando, trocando --check "
-        "por --url http://127.0.0.1:<porta> --out-dir artifacts/web-qa --label primeira-passagem. "
+        "quando compatível com a arquitetura. Use os scripts que acompanham .agents/skills/hallmark. "
+        "Não presuma que Puppeteer está instalado. Verifique se Playwright e um navegador estão "
+        "disponíveis antes do QA; use a dependência Playwright já declarada pelo projeto quando possível. "
         "Não instale dependências automaticamente. Rode sloplint.mjs --render quando o renderizador estiver "
-        "disponível; se Puppeteer faltar, faça sloplint estático e use o helper Playwright para capturas "
-        "desktop/tablet/mobile e inspeção visual.\n"
+        "disponível; se Puppeteer faltar, faça sloplint estático e use Playwright/webapp-testing para "
+        "capturas desktop/tablet/mobile e inspeção visual.\n"
         "RESTRIÇÃO DE REDE: não execute theme.mjs photos, imagegen.mjs, downloads, Wikimedia, Together "
         "API, serviços externos ou quaisquer chamadas de rede para obter fotos/comps sem autorização "
         "específica do usuário. Não use o passo de comps que exige TOGETHER_API_KEY. Prefira assets "
@@ -153,7 +155,7 @@ def _web_workflow_directive():
         "composição em desktop, tablet e mobile (grid, hierarquia, espaçamento, tipografia, cor, "
         "proporção e comportamento responsivo).\n"
         "HERO-FIRST: construa a navegação e o hero primeiro. Se Puppeteer estiver instalado, rode "
-        "sloplint --render --stage hero; em qualquer caso, capture o hero com o helper Playwright local "
+        "sloplint --render --stage hero; em qualquer caso, capture o hero com Playwright local "
         "e inspecione a imagem antes de completar o restante. Depois implemente a página inteira, rode "
         "sloplint estático e --render se disponível, e gere capturas finais desktop/tablet/mobile. Um "
         "sloplint com FAIL/REFLEX é uma lista de achados para corrigir, não motivo para encerrar a tarefa. "

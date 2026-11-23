@@ -77,14 +77,17 @@ class CodexWebQualityPolicyTests(unittest.TestCase):
         directive = codex_agent._web_workflow_directive()
         self.assertIn("\n", directive)
         self.assertNotIn("\\n", directive)
-        self.assertIn("$jarvis-web-workflow", directive)
+        self.assertIn("$webapp-testing", directive)
+        self.assertIn("jarvis_browser_qa.py", directive)
+        self.assertIn("--project-dir", directive)
 
     def test_required_skill_inputs_are_added_only_for_web_tasks(self):
         items = codex_agent._web_skill_inputs()
         names = {item["name"] for item in items}
-        self.assertIn("jarvis-web-workflow", names)
+        self.assertIn("hallmark", names)
         self.assertIn("frontend-design", names)
         self.assertIn("webapp-testing", names)
+        self.assertNotIn("jarvis-web-workflow", names)
         self.assertTrue(all(Path(item["path"]).is_file() for item in items))
 
 

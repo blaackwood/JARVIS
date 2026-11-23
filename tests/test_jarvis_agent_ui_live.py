@@ -14,7 +14,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 SERVER = ROOT / "_jarvis_agent_ui" / "server.py"
-PYTHON = ROOT / ".venv" / "Scripts" / "python.exe"
+PYTHON = Path(sys.executable)
 
 
 class JarvisAgentUILiveTests(unittest.TestCase):
@@ -131,7 +131,7 @@ class JarvisAgentUILiveTests(unittest.TestCase):
                 self.assertEqual(page.title(), "JARVIS — Agente")
                 self.assertTrue(page.locator("#in").is_visible())
                 self.assertTrue(page.locator("#nt").is_visible())
-                self.assertIn("JARVIS", page.locator("body").inner_text())
+                self.assertIn("Jarvis", page.locator("body").inner_text())
 
                 for key in ("pa", "pb", "pc", "pd"):
                     tab = page.locator('.tab[data-p="%s"]' % key)

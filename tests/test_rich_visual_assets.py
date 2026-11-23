@@ -7,6 +7,38 @@ from PIL import Image
 from core.molecule import parse_smiles, layout_molecule
 from core.visual_board import normalize_visual_payload
 
+def model_scene(label="Cena", x=2, y=3):
+    """Fixture de cena 3D válida: cinco corpos rotulados e conexões entre eles."""
+    names = ("Núcleo", "Entrada", "Processo", "Saída", "Energia")
+    offsets = ((0, 0, 0), (-28, -12, 0), (28, -12, 2), (-16, 25, 5), (18, 26, -4))
+    shapes = ("sphere", "cube", "cylinder", "cone", "torus")
+    parts = [
+        {
+            "id": f"part-{i}",
+            "shape": shapes[i],
+            "size": 18 if i == 0 else 10 + i,
+            "dx": offsets[i][0],
+            "dy": offsets[i][1],
+            "dz": offsets[i][2],
+            "label": f"{label} {names[i]}",
+        }
+        for i in range(5)
+    ]
+    return {
+        "type": "model3d",
+        "x": x,
+        "y": y,
+        "width": 62,
+        "height": 88,
+        "shape": "none",
+        "parts": parts,
+        "links": [
+            {"from": "part-0", "to": f"part-{i}", "flow": True}
+            for i in range(1, 5)
+        ],
+    }
+
+
 
 class MoleculeParserTests(unittest.TestCase):
     def test_simple_chain_and_double_bond(self):
@@ -172,10 +204,10 @@ class PhotoAssetTests(unittest.TestCase):
         }):
             result=show_visual({
                 "title":"Photo",
-                "elements":[{"type":"photo","query":"Water"}]
+                "elements":[model_scene("Água"), {"type":"photo","query":"Water"}]
             },player=player)
         self.assertIn("VISUAL_SHOWN",result)
-        sent=player.show_visual_board.call_args.args[0]["elements"][0]
+        sent=next(item for item in player.show_visual_board.call_args.args[0]["elements"] if item["type"] == "photo")
         self.assertEqual(sent["photo_data"],b"\\x89PNG")
         self.assertEqual(sent["credit"],"Wikipedia")
 
@@ -183,10 +215,10 @@ class PhotoAssetTests(unittest.TestCase):
         with patch("core.visual_assets.fetch_photo",side_effect=RuntimeError("no image")):
             result=show_visual({
                 "title":"Fallback",
-                "elements":[{"type":"photo","query":"Unknown Thing"}]
+                "elements":[model_scene("Fallback"), {"type":"photo","query":"Unknown Thing"}]
             },player=player)
         self.assertIn("VISUAL_SHOWN",result)
-        sent=player.show_visual_board.call_args.args[0]["elements"][0]
+        sent=next(item for item in player.show_visual_board.call_args.args[0]["elements"] if item["type"] == "photo")
         self.assertIn("Imagem indisponível",sent["photo_error"])
 
 

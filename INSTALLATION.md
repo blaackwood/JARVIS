@@ -116,6 +116,30 @@ only in the settings for the provider you choose. GitHub integration uses the
 official GitHub CLI (gh) and its operating-system credential store. Other
 integrations may require separate accounts, OAuth approval, or API keys.
 
+## Built-in browser QA
+
+The JARVIS Agent workbench uses the browser QA utility bundled with this
+repository. It relies on the included core/browser_qa.py service and does
+not require the unlicensed local Skill from the original developer machine.
+
+Check Playwright and Chromium:
+
+~~~powershell
+python tools/jarvis_browser_qa.py --check
+~~~
+
+Run browser QA against a web project:
+
+~~~powershell
+python tools/jarvis_browser_qa.py --project-dir C:\path\to\your\web-project
+~~~
+
+The runner only starts recognized local development servers on 127.0.0.1,
+captures desktop/mobile screenshots, reports console/network/HTTP errors,
+and stores evidence locally outside the repository. It does not install
+packages or browsers automatically. The project must already have its
+dependencies installed and a supported web entry point.
+
 ## Tests
 
 Run the focused first-run API and setup-gate tests:

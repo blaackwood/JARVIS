@@ -9,6 +9,38 @@ from actions.draw_right_triangle import draw_right_triangle
 from actions.visual_board import show_visual, clear_visual
 from core.action_loader import discover_actions
 
+def model_scene(label="Cena", x=2, y=3):
+    """Fixture de cena 3D válida: cinco corpos rotulados e conexões entre eles."""
+    names = ("Núcleo", "Entrada", "Processo", "Saída", "Energia")
+    offsets = ((0, 0, 0), (-28, -12, 0), (28, -12, 2), (-16, 25, 5), (18, 26, -4))
+    shapes = ("sphere", "cube", "cylinder", "cone", "torus")
+    parts = [
+        {
+            "id": f"part-{i}",
+            "shape": shapes[i],
+            "size": 18 if i == 0 else 10 + i,
+            "dx": offsets[i][0],
+            "dy": offsets[i][1],
+            "dz": offsets[i][2],
+            "label": f"{label} {names[i]}",
+        }
+        for i in range(5)
+    ]
+    return {
+        "type": "model3d",
+        "x": x,
+        "y": y,
+        "width": 62,
+        "height": 88,
+        "shape": "none",
+        "parts": parts,
+        "links": [
+            {"from": "part-0", "to": f"part-{i}", "flow": True}
+            for i in range(1, 5)
+        ],
+    }
+
+
 
 class VisualBoardPayloadTests(unittest.TestCase):
     def test_normalizes_geometry_primitives(self):
@@ -1305,7 +1337,7 @@ class VisualBoardQuizEventTests(unittest.TestCase):
             "title": "Fotossíntese",
             "beats": [
                 {"say": "A planta usa luz.", "elements": [
-                    {"type": "circle", "x": 15, "y": 12, "radius": 5, "color": "amber"},
+                    model_scene("Fotossíntese", x=15, y=12),
                     {"type": "text", "text": "Luz", "x": 10, "y": 20},
                 ]},
                 {"say": "Escolha uma opção no quadro.", "elements": [

@@ -73,12 +73,13 @@ class SemanticIndexTests(unittest.TestCase):
         self.assertIn("[event]", result)
 
     def test_credential_like_documents_are_excluded(self):
+        fake_key = "AIza" + ("1234567890" * 3)  # synthetic test fixture only
         (self.projects / "unsafe.json").write_text(json.dumps({
             "name": "Unsafe Project",
-            "notes": ["api_key=AIza123456789012345678901234567890"],
+            "notes": ["api_key=" + fake_key],
         }), encoding="utf-8")
         si.refresh_semantic_index(force=True)
-        result = si.search_semantic_memory("AIza123456789012345678901234567890")
+        result = si.search_semantic_memory(fake_key)
         self.assertIn("NO_SEMANTIC_MATCHES", result)
 
     def test_project_mentions_link_to_people(self):
@@ -97,15 +98,13 @@ class SemanticIndexTests(unittest.TestCase):
         self.assertIn("NO_SEMANTIC_MATCHES", si.search_semantic_memory("rawchatmarker928374"))
 
     def test_credential_in_entity_name_is_not_indexed(self):
+        fake_key = "AIza" + ("1234567890" * 3)  # synthetic test fixture only
         (self.projects / "unsafe-name.json").write_text(json.dumps({
-            "name": "api_key=AIza123456789012345678901234567890",
+            "name": "api_key=" + fake_key,
             "notes": ["Ordinary project note"],
         }), encoding="utf-8")
         si.refresh_semantic_index(force=True)
-        self.assertIn(
-            "NO_SEMANTIC_MATCHES",
-            si.search_semantic_memory("AIza123456789012345678901234567890"),
-        )
+        self.assertIn("NO_SEMANTIC_MATCHES", si.search_semantic_memory(fake_key))
 
     def test_refresh_is_idempotent_without_source_changes(self):
         first = si.refresh_semantic_index(force=True)

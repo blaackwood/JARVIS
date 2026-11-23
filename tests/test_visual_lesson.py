@@ -14,9 +14,41 @@ def beat(text, x=20):
     }
 
 
+
+def model_scene(label="Cena", x=2, y=3):
+    """Fixture de cena 3D válida: cinco corpos rotulados e conexões entre eles."""
+    names = ("Núcleo", "Entrada", "Processo", "Saída", "Energia")
+    offsets = ((0, 0, 0), (-28, -12, 0), (28, -12, 2), (-16, 25, 5), (18, 26, -4))
+    shapes = ("sphere", "cube", "cylinder", "cone", "torus")
+    parts = [
+        {
+            "id": f"part-{i}",
+            "shape": shapes[i],
+            "size": 18 if i == 0 else 10 + i,
+            "dx": offsets[i][0],
+            "dy": offsets[i][1],
+            "dz": offsets[i][2],
+            "label": f"{label} {names[i]}",
+        }
+        for i in range(5)
+    ]
+    return {
+        "type": "model3d",
+        "x": x,
+        "y": y,
+        "width": 62,
+        "height": 88,
+        "shape": "none",
+        "parts": parts,
+        "links": [
+            {"from": "part-0", "to": f"part-{i}", "flow": True}
+            for i in range(1, 5)
+        ],
+    }
+
 def diagram_beat(text, x=20):
     result = beat(text, x)
-    result["elements"].append({"type": "circle", "x": 10, "y": 10, "radius": 4})
+    result["elements"].append(model_scene(text[:24], x=2, y=3))
     return result
 
 
@@ -147,36 +179,32 @@ class VisualLessonActionTests(unittest.TestCase):
         player = self.player()
         result = present_visual_lesson({
             "title": "Demonstração do Teorema de Pitágoras",
-            "layout": "geometry",
             "beats": [
                 {
                     "say": "Este é um triângulo retângulo, com um ângulo de noventa graus.",
-                    "elements": [
-                        {"type": "polygon", "id": "triangle_poly", "points": [
-                            {"x": 30, "y": 20}, {"x": 30, "y": 60}, {"x": 60, "y": 60}
-                        ]},
-                        {"type": "polyline", "id": "right_angle", "points": [
-                            {"x": 30, "y": 55}, {"x": 35, "y": 55}, {"x": 35, "y": 60}
-                        ]},
-                    ],
+                    "elements": [model_scene("Triângulo")],
                 },
                 {
                     "say": "Os lados menores são os catetos. O lado oposto é a hipotenusa.",
                     "elements": [
-                        {"type": "text", "id": "label_a", "text": "Cateto A", "anchor": "triangle_a_label"},
-                        {"type": "text", "id": "label_b", "text": "Cateto B", "anchor": "triangle_b_label"},
-                        {"type": "text", "id": "label_c", "text": "Hipotenusa", "anchor": "triangle_hypotenuse_label"},
+                        model_scene("Lados"),
+                        {"id": "label_a", "text": "Cateto A", "anchor": "triangle_a_label"},
+                        {"id": "label_b", "text": "Cateto B", "anchor": "triangle_b_label"},
+                        {"id": "label_c", "text": "Hipotenusa", "anchor": "triangle_hypotenuse_label"},
                     ],
                 },
                 {
                     "say": "O teorema diz que a soma dos quadrados dos catetos é igual ao quadrado da hipotenusa.",
                     "elements": [
-                        {"type": "formula", "id": "formula_card", "title": "Teorema de Pitágoras", "text": "A² + B² = C²", "x": 70, "y": 20}
+                        model_scene("Teorema"),
+                        {"type": "formula", "id": "formula_card", "title": "Teorema de Pitágoras",
+                         "text": "A² + B² = C²", "x": 70, "y": 20},
                     ],
                 },
                 {
                     "say": "Se os catetos medem três e quatro centímetros, vamos calcular a hipotenusa.",
                     "elements": [
+                        model_scene("Exemplo"),
                         {"id": "example_a", "x": 20, "y": 40, "text": "3 cm"},
                         {"id": "example_b", "x": 45, "y": 65, "text": "4 cm"},
                         {"id": "example_c", "x": 50, "y": 35, "text": "5 cm?"},
@@ -185,9 +213,9 @@ class VisualLessonActionTests(unittest.TestCase):
                 {
                     "say": "Três ao quadrado mais quatro ao quadrado é igual a vinte e cinco; a raiz é cinco.",
                     "elements": [
-                        {"type": "list", "id": "calc_card", "title": "Cálculo da Hipotenusa", "items": [
-                            "3² + 4² = C²", "9 + 16 = 25", "C = √25 = 5"
-                        ], "x": 70, "y": 50}
+                        model_scene("Cálculo"),
+                        {"type": "text", "id": "calc_card", "title": "Cálculo da Hipotenusa",
+                         "text": "3² + 4² = C² · 9 + 16 = 25 · C = √25 = 5", "x": 70, "y": 50},
                     ],
                 },
             ],
@@ -197,10 +225,13 @@ class VisualLessonActionTests(unittest.TestCase):
         player.show_visual_board.assert_called_once()
         payload = player.show_visual_board.call_args.args[0]
         self.assertEqual(len(payload["_lesson_timeline"]), 5)
-        self.assertEqual(len(payload["elements"]), 10)
+        models = [item for item in payload["elements"] if item["type"] == "model3d"]
+        self.assertEqual(len(models), 5)
+        self.assertTrue(all(len(item["parts"]) == 5 for item in models))
         self.assertEqual(
-            [item["type"] for item in payload["elements"][6:9]],
-            ["text", "text", "text"],
+            [item["text"] for item in payload["elements"] if item["type"] == "text"
+             and any(str(item.get("id") or "").endswith(suffix) for suffix in ("label_a", "label_b", "label_c"))],
+            ["Cateto A", "Cateto B", "Hipotenusa"],
         )
 
     @unittest.skip("3D-only: the flat Pythagoras triangle is disabled")
@@ -267,7 +298,7 @@ class VisualLessonActionTests(unittest.TestCase):
             "title": "Fotossíntese",
             "beats": [
                 {"say": "A luz chega à folha.", "elements": [
-                    {"type": "circle", "x": 25, "y": 30, "radius": 8},
+                    model_scene("Luz", x=25, y=30),
                     {"type": "text", "text": "Luz solar"},
                 ]},
                 {"say": "A planta usa água.", "elements": [
@@ -289,7 +320,7 @@ class VisualLessonActionTests(unittest.TestCase):
         player = self.player()
         result = present_visual_lesson({"title": "Ciclo", "beats": [
             {"say": "Primeiro.", "elements": [
-                {"type": "circle", "x": 40, "y": 40},
+                model_scene("Primeiro", x=40, y=40),
                 {"type": "text", "x": 50, "y": 20, "text": "Primeiro"},
             ]},
             {"say": "Depois.", "elements": [

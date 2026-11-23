@@ -181,6 +181,7 @@ files in actions/.
 - Holographic desktop: avatar, visual HUD, settings workspace, audio
   controls, provider selection, memory controls, plugin settings and
   identity customization.
+- Built-in browser QA: Playwright-based project checks, responsive screenshots, console/request diagnostics, local-only server binding and evidence reports via tools/jarvis_browser_qa.py and core/browser_qa.py.
 - JARVIS Agent workbench: a separate local web/desktop interface for
   coding tasks, plans, file changes, approvals, Codex App Server and
   workspace-oriented execution. See _jarvis_agent_ui/.

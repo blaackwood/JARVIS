@@ -76,7 +76,9 @@ class SingleVisualSkinTests(unittest.TestCase):
         for fragment in fragments:
             with self.subTest(fragment=fragment):
                 self.assertIn(fragment, skin)
-        for bad in (chr(0xc3), chr(0xc2), chr(0xe2), chr(0xfffd)):
+        # Do not reject valid Portuguese uppercase accents such as Ã in
+        # PERSONALIZAÇÃO. Reject common UTF-8/Windows-codepage mojibake sequences.
+        for bad in ("Ãƒ", "Ã‚", "â€", chr(0xfffd)):
             with self.subTest(bad=bad):
                 self.assertNotIn(bad, skin)
                 self.assertNotIn(bad, preview)
