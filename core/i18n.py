@@ -14,6 +14,8 @@ LANGUAGE_CHOICES = (
 
 
 PT_TO_EN = {
+    "1-4 estados  N noticias  S pesquisa  H inicio  T tarefas  R rotinas  C controles  G config  F4 mutar  ESC interromper  F11 tela cheia  ESC sair": "1-4 states  N news  S search  H home  T tasks  R routines  C controls  G settings  F4 mute  ESC interrupt  F11 full screen  ESC exit",
+
     "INÍCIO": "HOME", "INICIO": "HOME", "TAREFAS": "TASKS",
     "ROTINAS": "ROUTINES", "CONTROLES": "CONTROLS", "CONFIG": "SETTINGS",
     "Microfone": "Microphone", "Desligado, o Jarvis para de escutar": "Off — JARVIS stops listening",

@@ -569,7 +569,7 @@ class NovoVisual(HoloMixin, QWidget):
         p.setFont(mk_font(8))
         p.setPen(QColor(255, 255, 255, 70))
         p.drawText(QRectF(0, y + h + 10, W, 16), Qt.AlignmentFlag.AlignHCenter,
-                   "" if getattr(self, "live", False) else self._tr("1-4 estados  N noticias  S pesquisa  H inicio  T tarefas  R rotinas  C controles  G config  M mutar  I interromper  O esfera  Espaco demo  F11 tela cheia  Esc sair"))
+                   "" if getattr(self, "live", False) else self._tr("1-4 states  N news  S search  H home  T tasks  R routines  C controls  G settings  F4 mute  ESC interrupt  F11 full screen  ESC exit"))
 
 
 
