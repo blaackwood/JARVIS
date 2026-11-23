@@ -18,7 +18,7 @@ follow the Windows display language.
 
 ### Background footprint
 
-When the desktop interface is idle or hibernated, JARVIS can keep only its optional wake-word companion active. The native Windows listener is designed for low CPU overhead; a single Task Manager snapshot showed 0.8% CPU and 21.4 MB RAM for JarvisWakeNative.exe. This is a point-in-time reading of that process only. Total usage depends on the PC and on which JARVIS modules or tasks are active. This can be useful when gaming or running other CPU-intensive foreground applications.
+When the desktop interface is idle or hibernated, JARVIS can keep only its optional wake-word companion active. The source tree includes a native C++ listener for local builds; a single Task Manager snapshot of that development binary, JarvisWakeNative.exe, showed 0.8% CPU and 21.4 MB RAM. The published Windows installer ships the separate JARVIS-Wake.exe Python listener, so the snapshot is not a benchmark of the packaged listener. Total usage depends on the PC and on which JARVIS modules or tasks are active. This can be useful when gaming or running other CPU-intensive foreground applications.
 
 The installer bundles the Python runtime and application dependencies. Python
 and Git are not required on the target computer. It does not turn on wake-word

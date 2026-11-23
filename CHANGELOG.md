@@ -7,10 +7,10 @@ All notable changes to JARVIS are documented here.
 ### Added
 - Persistent application language selection: English (US) by default, with Brazilian Portuguese available in Identity settings.
 - Consistent localization for HUD modules, status states and keyboard shortcuts.
-- Documentation for low-overhead background operation and the optional native Windows wake-word companion.
+- Documentation for low-overhead background operation and the separate wake-word worker; the source tree also includes an optional native C++ listener for local builds.
 
 ### Performance notes
-- A Windows Task Manager snapshot recorded the native JarvisWakeNative.exe listener at 0.8% CPU and 21.4 MB RAM. This is a point-in-time measurement of that process, not a whole-app benchmark or a guarantee across hardware and workloads.
+- A Windows Task Manager snapshot of the development-only native JarvisWakeNative.exe recorded 0.8% CPU and 21.4 MB RAM. The public installer ships the separate JARVIS-Wake.exe Python listener; the native snapshot is not a benchmark of the packaged listener or the whole app.
 
 ## [0.1.0] — 2026-11-23
 

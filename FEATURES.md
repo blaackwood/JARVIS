@@ -12,7 +12,7 @@ bundled yet, but the translation catalogue is extensible.
 
 ## Background performance
 
-JARVIS is designed to minimize background overhead when its full desktop interface is idle or hibernated. Its optional Windows native wake-word companion is isolated from the main UI. One Task Manager observation showed JarvisWakeNative.exe at 0.8% CPU and 21.4 MB RAM; this is a single-process, point-in-time observation, not a whole-application benchmark or a universal performance guarantee. Usage varies with hardware, drivers, active audio, enabled modules and background tasks. This design is intended to leave more resources available for games and other foreground workloads.
+JARVIS is designed to minimize background overhead when its full desktop interface is idle or hibernated. Wake-word waiting is isolated from the main UI in an optional background worker, allowing the full desktop interface to hibernate. The source tree includes a native C++ listener for local builds; one Task Manager observation of that development binary, JarvisWakeNative.exe, showed 0.8% CPU and 21.4 MB RAM. The published Windows installer ships the separate JARVIS-Wake.exe Python listener, so that measurement is not a benchmark of the packaged listener or the whole app. Usage varies with hardware, drivers, active audio, enabled modules and background tasks. This design is intended to leave more resources available for games and other foreground workloads.
 
 ## authorization
 
