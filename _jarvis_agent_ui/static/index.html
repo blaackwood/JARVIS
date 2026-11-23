@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="tk" content="__TOKEN__"><title>JARVIS — Agente</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d1716'/%3E%3Cpath d='M32 8 54 20v24L32 56 10 44V20z' fill='none' stroke='%2300d4ff' stroke-width='4'/%3E%3Cpath d='M24 41V23h8l8 18V23' fill='none' stroke='%2300d4ff' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="extra.css"></head>
+<body data-ac="green">
+<div class="tb">
+  <button id="tsb" data-i="pl" title="Barra lateral (Ctrl+B)"></button>
+  <button class="mn" data-m="arq">Arquivo</button><button class="mn" data-m="edt">Editar</button><button class="mn" data-m="exi">Exibir</button><button class="mn" data-m="aju">Ajuda</button><button class="mn" id="hudb" title="Voltar ao visual HUD do Jarvis">HUD Jarvis</button>
+  <span class="sp"></span><span class="pv" id="wsn"></span>
+  <div class="dots" title="Tema"><i class="on" data-c="green" title="Qoder" style="background:#3fd08a"></i><i data-c="claude" title="Claude Code" style="background:#d97757"></i><i data-c="codex" title="Codex" style="background:#7aa2ff"></i><i data-c="jarvis" title="Jarvis" style="background:#00d4ff"></i></div>
+</div>
+<div class="wrap">
+<aside class="sb">
+  <div class="md"><button class="c"><span data-i="term"></span>Coding</button></div>
+  <button class="nv" id="nt"><span data-i="plus"></span>Nova tarefa</button>
+  <button class="nv" id="att"><span data-i="send"></span>Minha atenção<span class="bd" id="attn"></span></button>
+  <button class="nv" id="sr"><span data-i="search"></span>Buscar</button>
+  <button class="nv" id="nsk"><span data-i="cube"></span>Skills</button>
+  <div class="sec" style="padding-top:14px">Tarefas recentes</div>
+  <div class="fl" id="tks"></div>
+  <button class="cr" id="crd"><span class="g" data-i="spark"></span><span><b id="crt">Provedor</b><small id="crs">—</small></span><span data-i="chev"></span></button>
+  <div class="us"><b id="uin">B</b><span id="usr" style="margin:0;display:inline">bwd</span><span><i data-i="gear" id="gear" style="cursor:pointer" title="Configurações"></i></span></div>
+</aside>
+<section class="mp">
+  <div class="mh"><h1 id="ttl">Nova tarefa</h1><button class="mo" id="more" data-i="more" title="Mais"></button>
+    <div class="r"><button class="fd" id="fld" title="Pasta de trabalho"><span data-i="folder"></span><span data-i="chev" style="width:12px"></span></button><button id="zap" data-i="zap" title="Comprimir contexto"></button><button id="tdb" class="on" data-i="list" title="Mostrar/ocultar lista de tarefas"></button><button id="trm2" data-i="pb" title="Terminal"></button><button class="on" id="trp" data-i="pr" title="Painel direito"></button></div></div>
+  <div class="mb">
+    <div class="ch">
+      <div class="fd2" id="feed"><div class="col" id="col"><div class="emp" id="emp">Peça algo ao Jarvis. Ele pode ler arquivos em todo o PC. Cada alteração e comando exige sua aprovação individual.</div><div class="th" id="think"><span class="g">⠿</span>Pensando…</div></div></div>
+      <div class="pw" id="pw"><div class="pill" id="pill"></div></div>
+      <div class="cw"><div class="cb">
+        <div class="atl" id="atl"></div>
+        <textarea id="in" rows="1" placeholder="Peça ao Jarvis…   ( / comandos · @ arquivos · Enter envia · Shift+Enter quebra linha )"></textarea>
+        <div class="cbr">
+          <button class="rb" id="pls" data-i="plus" title="Comandos"></button><button class="rb" id="skillpick" title="Selecionar skills">$</button><button class="rb" id="clp" style="border:0" data-i="clip" title="Anexar PDF, imagem ou arquivo"></button><input type="file" id="fin" multiple accept="image/png,image/jpeg,image/webp,image/gif,.pdf,.txt,.md,.json,.csv,.py,.js,.html,.css,.xml" hidden>
+          <button class="pl2" id="ap"><span data-i="play"></span><span id="apt">Pedir aprovação</span><span class="chv" data-i="chev"></span></button>
+          <span style="flex:1"></span>
+          <button class="pl2" id="md2"><span data-i="spark"></span><span id="mdt">Auto</span><span class="chv" data-i="chev"></span></button>
+          <button class="pl2" id="mic" data-i="mic" title="Ditar (pt-BR)"></button>
+          <button class="sd" id="sd"></button>
+        </div></div>
+        <div class="ft"><span data-i="mon"></span>&nbsp;<span id="ftw">Local</span><span style="margin:0 8px;color:var(--fa)">·</span><span id="ftb">main</span><span style="margin:0 8px;color:var(--fa)">·</span><span id="sbm" style="color:var(--ac)">pedir aprovação</span><span style="margin-left:6px;color:var(--fa)">(shift+tab alterna)</span><div class="bar" title="Contexto usado"><i id="barf"></i><span id="pct">0%</span></div></div>
+      </div>
+    </div>
+    <aside class="rp"><div class="tabs"><button class="tab on" data-p="pa">Resumo</button><button class="tab" data-p="pb">Alterações <span class="chip" id="chgn" style="margin-left:4px">0</span></button><button class="tab" data-p="pc">Arquivos</button><button class="tab" data-p="pd">Terminal</button></div>
+      <div class="pn on" id="pa"></div><div class="pn" id="pb"></div><div class="pn" id="pc"></div>
+      <div class="pn" id="pd"><div class="tr" id="trh"></div><div class="tin"><span class="p" id="tpr">PS&gt;</span><input id="tci" spellcheck="false" placeholder="comando…"></div></div>
+    </aside>
+  </div>
+<div class="bt" id="btm"><div class="bth"><span class="btab">Jarvis</span><span class="spc"></span><button id="btx" title="Fechar terminal">✕</button></div><pre id="bto"></pre><div class="bti"><span id="btp"></span><input id="btin" spellcheck="false" autocomplete="off"></div></div></section>
+</div>
+<div class="mn2" id="menu"></div><div class="toast" id="toast"></div>
+<div class="mod" id="skm"><div class="box"><input id="skq" placeholder="Filtrar skills e agentes..." autocomplete="off"><div id="skl"></div></div></div>
+<div class="mod" id="mod"><div class="box"><input id="msi" placeholder="Buscar tarefas e arquivos…" autocomplete="off"><div id="msr"></div></div></div>
+<div class="mod" id="nvm" role="dialog" aria-modal="true" aria-labelledby="nvtitle"><div class="box nvbox">
+  <div class="nvhead"><div><h2 id="nvtitle">Conectar NVIDIA</h2><p>Nemotron 3.5 Super VL · GLM-5.3-Flash como alternativa</p></div><button id="nvx" type="button" title="Fechar">×</button></div>
+  <label for="nvkey">Chave da API NVIDIA</label><input id="nvkey" type="password" spellcheck="false" autocomplete="off" placeholder="nvapi-…">
+  <div class="nvfile"><button id="nvdl" type="button">Importar de Downloads</button><button id="nvfile" type="button">Escolher outro arquivo</button><input id="nvfileinput" type="file" accept=".txt,text/plain" hidden></div>
+  <p class="nvhelp">A chave fica salva somente na configuração local do JARVIS. Você também pode importar o arquivo baixado da NVIDIA; o conteúdo dele não será exibido.</p>
+  <div id="nvstatus" role="status" aria-live="polite"></div>
+  <div class="nvactions"><button id="nvcancel" type="button">Fechar</button><button id="nvsave" type="button">Validar e salvar chave</button><button id="nvtest" type="button" disabled>Testar Nemotron e ativar</button></div>
+</div></div>
+<script src="icons.js"></script><script src="app.js"></script>
+</body></html>

@@ -1,0 +1,16 @@
+Public release staging manifest
+
+Included: first-party source/runtime, curated docs, tests, 40 redistributable
+Skills with their upstream licences, and references for three reference-only Skill entries.
+
+Excluded by design:
+- config/api_keys.json and all backups/temporary siblings
+- .env, .dev.vars, Tavily keys, provider credentials and OAuth tokens
+- memory data, conversation history, task queues, semantic databases and logs
+- personal project briefs, protected-project lists and task workspaces
+- _jarvis_agent_ui/data, approval history, screenshots, downloads and backups
+- virtual environments, node_modules, compiled binaries and installer outputs
+- bundled Stockfish executable (>100 MB); user downloads Stockfish separately
+- source backup files, checkpoints, test artefacts and historical reports
+
+This manifest is for the release audit and is not part of the runtime.

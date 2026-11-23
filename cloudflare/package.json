@@ -1,0 +1,17 @@
+{
+  "name": "jarvis-cloudflare-reminders",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create jarvis-reminders",
+    "db:migrate:local": "wrangler d1 migrations apply jarvis-reminders --local",
+    "db:migrate:remote": "wrangler d1 migrations apply jarvis-reminders --remote",
+    "test": "node --test tests/worker-unit.test.mjs",
+    "test:smoke": "node smoke.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "4.163.0"
+  }
+}

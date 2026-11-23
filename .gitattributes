@@ -1,0 +1,17 @@
+# Store source text consistently while leaving binary assets untouched.
+* text=auto eol=lf
+*.ico binary
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.mp4 binary
+*.wav binary
+*.onnx binary
+*.tflite binary
+*.exe binary
+*.dll binary
+*.pyd binary
+*.obj text eol=lf
