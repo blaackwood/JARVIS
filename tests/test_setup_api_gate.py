@@ -21,7 +21,7 @@ class FirstRunApiGateTests(unittest.TestCase):
             self.assertFalse(MainWindow._check_config(SimpleNamespace()))
 
 
-    def test_validated_personal_key_remains_valid_when_local_mode_is_selected(self):
+    def test_valid_personal_key_stays_valid_with_local_or_alternate_provider(self):
         config = {
             "os_system": "windows",
             "gemini_api_key": "AIza" + "x" * 35,

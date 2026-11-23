@@ -1,6 +1,6 @@
 Public release staging manifest
 
-Included: first-party source/runtime, curated docs, tests, 40 redistributable
+Included: first-party source/runtime, curated docs, tests, 39 redistributable
 Skills with their upstream licences, and references for three reference-only Skill entries.
 
 Excluded by design:

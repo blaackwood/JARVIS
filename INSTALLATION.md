@@ -47,7 +47,7 @@ python -m playwright install chromium firefox
 
 JARVIS requires the user's own Gemini API key. Create one in Google AI Studio,
 start the app, paste the key into the protected setup field, and validate it.
-The first-run gate does not accept a blank key or a local-only shortcut.
+The first-run gate does not accept a blank key. Selecting an alternate/local provider later does not erase the key required for initial provisioning.
 
 The key is written to config/api_keys.json. The file is excluded by Git,
 but the current implementation stores it in plain text. Protect your operating
