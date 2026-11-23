@@ -60,8 +60,8 @@ def generate_lesson(question: str, error: str = "") -> dict | None:
         prompt = (
             _RULES
             + "\n\n" + language_instruction()
-            + f"\nEvery title, part label, link label and spoken 'say' caption must be written in {language_name()}. "
-            "The Portuguese examples in the fixed template illustrate structure only; do not copy their language "
+            + f"\nLANGUAGE RULE: Every human-readable string in the entire 3D lesson (title, subtitle, all 3D labels, part/model labels, link labels, captions, annotations, and spoken 'say') must be written in {language_name()}. "
+            "No mixed-language content is allowed: every human-readable field, including all labels and narration, must follow the selected app language. The Portuguese examples in the fixed template illustrate structure only; do not copy their language "
             "when English is selected."
             + "\nQUESTION: " + question
         )

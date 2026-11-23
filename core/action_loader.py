@@ -128,7 +128,14 @@ class ActionRegistry:
     def get_tool_declarations(self) -> list[dict]:
         out = []
         for rec in self._actions.values():
-            decl = {"name": rec.name, "description": rec.description,
+            description = rec.description
+            if rec.name in {"show_visual", "present_visual_lesson"}:
+                try:
+                    from core.i18n import visual_content_instruction
+                    description = (description + "\n\n" + visual_content_instruction()).strip()
+                except Exception:
+                    pass
+            decl = {"name": rec.name, "description": description,
                     "parameters": rec.parameters}
             if rec.behavior:
                 decl["behavior"] = rec.behavior

@@ -80,6 +80,42 @@ class AppLanguageRuntimeTests(unittest.TestCase):
         self.assertEqual(i18n.speech_language_code("en-US"), "en-US")
         self.assertEqual(i18n.speech_language_code("pt-BR"), "pt-BR")
 
+    def test_visual_content_instruction_is_strict_and_locale_specific(self):
+        english = i18n.visual_content_instruction("en-US")
+        portuguese = i18n.visual_content_instruction("pt-BR")
+        self.assertIn("American English", english)
+        self.assertIn("3D object/part labels", english)
+        self.assertIn("Do not leave Portuguese words", english)
+        self.assertIn("Brazilian Portuguese", portuguese)
+        self.assertIn("3D object/part labels", portuguese)
+        self.assertIn("Do not leave English words", portuguese)
+        self.assertNotIn("Brazilian Portuguese", english)
+        self.assertNotIn("American English", portuguese)
+
+    def test_visual_tool_declarations_include_selected_language_policy(self):
+        from core.action_loader import ActionRecord, ActionRegistry
+        records = {
+            "show_visual": ActionRecord(
+                name="show_visual", description="base visual tool", parameters={}, valid=True
+            ),
+            "present_visual_lesson": ActionRecord(
+                name="present_visual_lesson", description="base lesson tool", parameters={}, valid=True
+            ),
+        }
+        registry = ActionRegistry(records, lambda _message: None)
+        with mock.patch.object(config_manager, "load_api_keys", return_value={"app_language": "en-US"}):
+            en = registry.get_tool_declarations()
+        with mock.patch.object(config_manager, "load_api_keys", return_value={"app_language": "pt-BR"}):
+            pt = registry.get_tool_declarations()
+        for declaration in en:
+            self.assertIn("VISUAL CONTENT LANGUAGE — HARD REQUIREMENT", declaration["description"])
+            self.assertIn("American English", declaration["description"])
+            self.assertIn("Do not leave Portuguese words", declaration["description"])
+        for declaration in pt:
+            self.assertIn("VISUAL CONTENT LANGUAGE — HARD REQUIREMENT", declaration["description"])
+            self.assertIn("Brazilian Portuguese", declaration["description"])
+            self.assertIn("Do not leave English words", declaration["description"])
+
     def test_startup_greeting_matches_selected_locale(self):
         english = i18n.startup_greeting_prompt(8, "en-US")
         portuguese = i18n.startup_greeting_prompt(20, "pt-BR")

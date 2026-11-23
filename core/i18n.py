@@ -171,8 +171,8 @@ def language_instruction(language: str | None = None) -> str:
             "This is the persistent app language setting, not a one-turn request. "
             "Use another language only when the user explicitly requests translation or a specific "
             "task in another language; then return to Brazilian Portuguese afterwards. "
-            "Text shown in the UI, spoken replies, greetings, narration and visual-lesson captions "
-            "must follow this setting. Never use European Portuguese."
+            "Text shown in the UI, spoken replies, greetings, narration, visual-lesson captions, and every title, subtitle, label, annotation, quiz, status, and explanation generated for 2D/3D visual tools "
+            "must follow this setting. Never use European Portuguese. Never mix languages within a visual explanation."
         )
     return (
         "[JARVIS LANGUAGE — APP PREFERENCE]\n"
@@ -182,8 +182,35 @@ def language_instruction(language: str | None = None) -> str:
         "This is the persistent app language setting, not a one-turn request. "
         "Use another language only when the user explicitly requests translation or a specific "
         "task in another language; then return to American English afterwards. "
-        "Text shown in the UI, spoken replies, greetings, narration and visual-lesson captions "
+        "Text shown in the UI, spoken replies, greetings, narration, visual-lesson captions, and every title, subtitle, label, annotation, quiz, status, and explanation generated for 2D/3D visual tools "
         "must follow this setting."
+    )
+
+
+def visual_content_instruction(language: str | None = None) -> str:
+    """Strict locale policy for every textual field produced by visual/3D tools."""
+    lang = app_language(language)
+    if lang == "en-US":
+        return (
+            "VISUAL CONTENT LANGUAGE — HARD REQUIREMENT: Write absolutely every human-readable "
+            "string in this visual output in American English: title, subtitle, lesson title, "
+            "3D object/part labels, model labels, link/arrow labels, captions, spoken 'say' text, "
+            "text annotations, formula explanations, quiz questions and choices, hints, status text, "
+            "and any explanatory text. Do not leave Portuguese words or mixed-language fragments. "
+            "Keep scientific names, standard symbols, equations, proper names, and user-provided "
+            "quoted text unchanged only when they are not meant to be translated. Translate the "
+            "meaning of fixed Portuguese examples; never copy their Portuguese wording. "
+            "Before returning tool arguments, check every text field for language consistency."
+        )
+    return (
+        "VISUAL CONTENT LANGUAGE — HARD REQUIREMENT: Write absolutely every human-readable "
+        "string in this visual output in Brazilian Portuguese: title, subtitle, lesson title, "
+        "3D object/part labels, model labels, link/arrow labels, captions, spoken 'say' text, "
+        "text annotations, formula explanations, quiz questions and choices, hints, status text, "
+        "and any explanatory text. Do not leave English words or mixed-language fragments. "
+        "Keep scientific names, standard symbols, equations, proper names, and user-provided "
+        "quoted text unchanged only when they are not meant to be translated. "
+        "Before returning tool arguments, check every text field for language consistency."
     )
 
 
