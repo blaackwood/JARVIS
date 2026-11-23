@@ -1,12 +1,31 @@
 # JARVIS
 
+<p align="center">
+  <img src="docs/media/social-preview.png" alt="JARVIS: seu assistente de IA para desktop" width="100%">
+</p>
+
+<p align="center">
+  <a href="https://github.com/blaackwood/JARVIS/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/blaackwood/JARVIS?color=8f76ff"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-8f76ff"></a>
+  <img alt="Platform: Windows 10/11" src="https://img.shields.io/badge/platform-Windows%2010%2F11-0078d4">
+  <img alt="Voice: Gemini Live" src="https://img.shields.io/badge/voice-Gemini%20Live-4285f4">
+</p>
+
+<p align="center"><strong>Um JARVIS de verdade no seu desktop: voz ao vivo, controle do computador e aulas 3D sobre qualquer assunto.</strong></p>
+
 **Windows 10/11 · 64 bits · v0.1.0**
 
-**[⬇ Baixar instalador do JARVIS](https://github.com/blaackwood/JARVIS/releases/latest/download/JARVIS-Setup.exe)** · [Ver todas as versões](https://github.com/blaackwood/JARVIS/releases)
+**[⬇ Baixar instalador do JARVIS](https://github.com/blaackwood/JARVIS/releases/latest/download/JARVIS-Setup.exe)** · [Ver todas as versões](https://github.com/blaackwood/JARVIS/releases) · cerca de 435 MB
 
-**Assistente pessoal de desktop criado por blaackwood.**
+Criado por [blaackwood](https://github.com/blaackwood).
 
 O instalador para Windows já inclui o runtime e as dependências do aplicativo. Você **não precisa instalar Python ou Git** para usar esta versão.
+
+> **O Windows pode exibir um aviso do SmartScreen.** O instalador ainda não é assinado digitalmente.
+> Baixe-o somente pela página de Releases deste repositório, escolha
+> **Mais informações → Executar assim mesmo** e, se quiser, confira o arquivo com
+> `Get-FileHash .\JARVIS-Setup.exe -Algorithm SHA256` comparando com o
+> `JARVIS-Setup.exe.sha256` publicado na release.
 
 English: [README.md](README.md)
 
@@ -20,25 +39,20 @@ ser configurada com a chave de API Gemini do próprio usuário. Nenhuma chave
 do desenvolvedor, memória pessoal, histórico de conversas ou configuração
 privada da instalação original é distribuída.
 
-## Veja o JARVIS em ação
+## Veja em ação
 
-Os GIFs abaixo mostram capturas curtas do renderizador de aulas 3D do próprio
-JARVIS: as cenas do sistema solar e da estrutura do átomo. A interação por voz
-aparece separadamente na captura da interface do aplicativo.
+<p align="center">
+  <img src="docs/media/screenshot-main.png" alt="Interface holográfica do JARVIS" width="80%">
+</p>
 
 <p align="center">
   <img src="docs/media/demo-solar-system.gif" alt="Aula 3D do sistema solar no JARVIS" width="49%">
   <img src="docs/media/demo-atom.gif" alt="Aula 3D da estrutura do átomo no JARVIS" width="49%">
 </p>
 
-<p align="center">
-  <img src="docs/media/screenshot-main.png" alt="Interface holográfica do JARVIS" width="100%">
-</p>
-
-<p align="center">
-  <img src="docs/media/screenshot-solar-system.png" alt="Captura da aula 3D do sistema solar" width="49%">
-  <img src="docs/media/screenshot-atom.png" alt="Captura da aula 3D de estrutura do átomo" width="49%">
-</p>
+<p align="center"><em>As aulas 3D acima foram capturadas do renderizador visual do próprio JARVIS
+(cenas do sistema solar e do átomo), sem áudio. Arraste para girar e use ESC para limpar.
+Um vídeo de demonstração com narração por voz será adicionado.</em></p>
 
 ## Requisitos
 

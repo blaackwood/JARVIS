@@ -1,13 +1,32 @@
 # JARVIS
 
+<p align="center">
+  <img src="docs/media/social-preview.png" alt="JARVIS: your desktop AI assistant" width="100%">
+</p>
+
+<p align="center">
+  <a href="https://github.com/blaackwood/JARVIS/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/blaackwood/JARVIS?color=8f76ff"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-8f76ff"></a>
+  <img alt="Platform: Windows 10/11" src="https://img.shields.io/badge/platform-Windows%2010%2F11-0078d4">
+  <img alt="Voice: Gemini Live" src="https://img.shields.io/badge/voice-Gemini%20Live-4285f4">
+</p>
+
+<p align="center"><strong>A real JARVIS on your desktop: live voice, computer control and 3D lessons on any topic.</strong></p>
+
 **Windows 10/11 · 64-bit · v0.1.0**
 
-**[Download the JARVIS Windows installer](https://github.com/blaackwood/JARVIS/releases/latest/download/JARVIS-Setup.exe)** · [All releases](https://github.com/blaackwood/JARVIS/releases)
+**[Download the JARVIS Windows installer](https://github.com/blaackwood/JARVIS/releases/latest/download/JARVIS-Setup.exe)** · [All releases](https://github.com/blaackwood/JARVIS/releases) · about 435 MB
 
-**A personal desktop assistant created by blaackwood.**
+Created by [blaackwood](https://github.com/blaackwood).
 
 The Windows installer bundles the application runtime and dependencies.
 You **do not need to install Python or Git** to use this release.
+
+> **Windows may show a SmartScreen warning.** The installer is not code-signed yet.
+> Download it only from this repository's Releases page, choose
+> **More info → Run anyway**, and optionally check the file with
+> `Get-FileHash .\JARVIS-Setup.exe -Algorithm SHA256` against the
+> `JARVIS-Setup.exe.sha256` file published on the release.
 
 Português: [README.pt-BR.md](README.pt-BR.md)
 
@@ -20,25 +39,20 @@ The main conversation engine is Google Gemini Live. Every installation must
 use the installing user's own Gemini API key. No developer key, personal
 memory, conversation archive, or local account configuration is included.
 
-## See JARVIS in action
+## See it in action
 
-The following short captures show the actual 3D lesson renderer running inside
-JARVIS. They demonstrate the solar-system and atom scenes; voice interaction is
-shown separately in the desktop interface screenshot.
+<p align="center">
+  <img src="docs/media/screenshot-main.png" alt="JARVIS holographic desktop interface" width="80%">
+</p>
 
 <p align="center">
   <img src="docs/media/demo-solar-system.gif" alt="JARVIS 3D solar system lesson" width="49%">
   <img src="docs/media/demo-atom.gif" alt="JARVIS 3D atom lesson" width="49%">
 </p>
 
-<p align="center">
-  <img src="docs/media/screenshot-main.png" alt="JARVIS holographic desktop interface" width="100%">
-</p>
-
-<p align="center">
-  <img src="docs/media/screenshot-solar-system.png" alt="JARVIS solar system 3D lesson screenshot" width="49%">
-  <img src="docs/media/screenshot-atom.png" alt="JARVIS atom 3D lesson screenshot" width="49%">
-</p>
+<p align="center"><em>The 3D lessons above were captured from JARVIS's own visual renderer
+(solar system and atom scenes), without audio. Drag to rotate, press ESC to clear.
+A demo video with live voice narration will be added.</em></p>
 
 ## Requirements
 
