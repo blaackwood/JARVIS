@@ -4,6 +4,16 @@ This inventory is generated from the TOOL declarations in the 41 action
 modules included in this release. A capability may require local
 permissions, an optional dependency, an external CLI, or a provider account.
 
+**Application language:** new installations default to English (US). The
+Identity settings include English (US) and Português (Brasil). The saved locale
+drives static interface labels, assistant responses, the startup greeting,
+Gemini Live's speech locale and visual-lesson narration. Other locales are not
+bundled yet, but the translation catalogue is extensible.
+
+## Background performance
+
+JARVIS is designed to minimize background overhead when its full desktop interface is idle or hibernated. Its optional Windows native wake-word companion is isolated from the main UI. One Task Manager observation showed JarvisWakeNative.exe at 0.8% CPU and 21.4 MB RAM; this is a single-process, point-in-time observation, not a whole-application benchmark or a universal performance guarantee. Usage varies with hardware, drivers, active audio, enabled modules and background tasks. This design is intended to leave more resources available for games and other foreground workloads.
+
 ## authorization
 
 Manage Jarvis action authorization. action=status shows all policy classes. action=set changes one class; class must be one of read_only, reversible_change, persistent_automation, destructive_change, external_commitment, security_bypass, credential_exposure, unknown_high_impact. decision must be allow, confirm or deny. Every policy change requires the human to confirm on the Jarvis HUD; never claim the change was saved before confirmation.

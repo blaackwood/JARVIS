@@ -13,7 +13,7 @@
 
 <p align="center"><strong>Um JARVIS de verdade no seu desktop: voz ao vivo, controle do computador e aulas 3D sobre qualquer assunto.</strong></p>
 
-**Windows 10/11 · 64 bits · v0.1.0**
+**Windows 10/11 · 64 bits · v0.2.0**
 
 **[⬇ Baixar instalador do JARVIS](https://github.com/blaackwood/JARVIS/releases/latest/download/JARVIS-Setup.exe)** · [Ver todas as versões](https://github.com/blaackwood/JARVIS/releases) · cerca de 435 MB
 
@@ -38,6 +38,20 @@ O motor principal de conversa é o Google Gemini Live. Cada instalação precisa
 ser configurada com a chave de API Gemini do próprio usuário. Nenhuma chave
 do desenvolvedor, memória pessoal, histórico de conversas ou configuração
 privada da instalação original é distribuída.
+
+## Idioma do JARVIS
+
+Uma instalação nova começa em **English (US)**. Para mudar, abra
+**Configurações → Identidade → Idioma do JARVIS** e selecione **Português
+(Brasil)**. A escolha fica salva localmente nesta instalação e controla a
+interface, as respostas do assistente, a saudação inicial, o idioma de fala do
+Gemini Live e a narração das aulas visuais. Ela não depende do idioma de
+exibição do Windows. No momento, estão incluídos inglês dos EUA e português do
+Brasil; a estrutura permite acrescentar outras traduções.
+
+## Baixo consumo em segundo plano
+
+O JARVIS foi projetado para manter baixo impacto quando a interface principal está ociosa ou hibernada. No Windows, o companheiro nativo opcional de palavra de ativação funciona separadamente, sem exigir que toda a interface permaneça ativa enquanto aguarda o comando. Em uma medição pontual no Gerenciador de Tarefas do Windows, o processo JarvisWakeNative.exe apresentou **0,8% de CPU e 21,4 MB de RAM**. Esse registro mede somente o listener nativo naquele momento; não é um benchmark de todos os componentes do JARVIS nem uma garantia para qualquer computador. O consumo real varia conforme hardware, drivers, atividade de áudio, módulos habilitados e tarefas em execução. A proposta é permitir que o JARVIS conviva bem com jogos, streaming e outras atividades pesadas em primeiro plano.
 
 ## Veja em ação
 

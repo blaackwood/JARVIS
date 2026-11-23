@@ -555,9 +555,11 @@ async def _live_turn(parts: list, system: str, key: str, timeout_s: float) -> st
 
 
 async def speech_pcm(text: str, voice: str, timeout_s: float = 20.0) -> bytes | None:
-    """Speak one lesson sentence. Locked to pt-BR; if the Live model rejects the language
-    field, retry once without it (the strict instruction below still asks for pt-BR)."""
-    result = await _speech_pcm_once(text, voice, timeout_s, "pt-BR")
+    """Speak one lesson sentence in the user's selected JARVIS language."""
+    from core.i18n import speech_language_code
+
+    lang = speech_language_code()
+    result = await _speech_pcm_once(text, voice, timeout_s, lang)
     if result == "RETRY_NO_LANG":
         result = await _speech_pcm_once(text, voice, timeout_s, "")
     return result if isinstance(result, (bytes, type(None))) else None
@@ -565,6 +567,7 @@ async def speech_pcm(text: str, voice: str, timeout_s: float = 20.0) -> bytes | 
 
 async def _speech_pcm_once(text: str, voice: str, timeout_s: float, lang: str):
     from google.genai import types as gtypes
+    from core.i18n import language_name
 
     if not text or not _LIVE_SLOTS.acquire(blocking=False):
         return None
@@ -574,11 +577,9 @@ async def _speech_pcm_once(text: str, voice: str, timeout_s: float, lang: str):
         config = gtypes.LiveConnectConfig(
             response_modalities=["AUDIO"],
             system_instruction=(
-                "Read the supplied sentence verbatim, in Brazilian Portuguese (pt-BR) with a natural "
-                "Brazilian accent and Brazilian pronunciation, as spoken in Sao Paulo. NEVER use "
-                "European Portuguese (pt-PT) pronunciation, vocabulary or intonation, in any sentence. "
-                "Keep the same voice, accent and pace as every other sentence. "
-                "Do not answer it, introduce it, add commentary or call tools."
+                f"Read the supplied sentence verbatim in {language_name()}. "
+                "Use the natural accent and pronunciation of that locale. Keep the same voice, accent and pace "
+                "as every other sentence. Do not answer it, introduce it, add commentary or call tools."
             ),
             speech_config=gtypes.SpeechConfig(
                 voice_config=gtypes.VoiceConfig(

@@ -95,7 +95,7 @@ def _project(raw):
              (home / "Projects").resolve()]
     if not any(root.exists() and folder != root and folder.is_relative_to(root) for root in roots):
         return None, "Por seguranÃƒÂ§a, sÃƒÂ³ trabalho em projetos dentro de Documents, Desktop ou Projects."
-    protected = [(home / "Documents" / "MinhaIA").resolve()]
+    protected = [Path(__file__).resolve().parents[1]]
     protected_file = Path(__file__).resolve().parents[1] / "config" / "protected_projects.json"
     if protected_file.is_file():
         try:

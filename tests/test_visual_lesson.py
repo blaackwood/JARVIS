@@ -440,7 +440,9 @@ class VisualLessonActionTests(unittest.TestCase):
             result = present_visual_lesson({"title": "Tutorial", "beats": [first]}, player=player)
         self.assertIn("PRESENTATION_PAUSED", result)
         self.assertNotIn("PRESENTATION_SHOWN", result)
-        self.assertTrue(player.set_visual_lesson_status.call_args.args[0].startswith("Etapa 1 pausada"))
+        from core.i18n import app_language
+        expected_prefix = "Step 1 paused" if app_language() == "en-US" else "Etapa 1 pausada"
+        self.assertTrue(player.set_visual_lesson_status.call_args.args[0].startswith(expected_prefix))
 
     def test_click_wait_always_restores_board_input_mode(self):
         player = self.player()

@@ -370,6 +370,35 @@ def update_config(**fields) -> None:
     _patch_config(**fields)
 
 
+APP_LANGUAGES = ("pt-BR", "en-US")
+DEFAULT_APP_LANGUAGE = "en-US"
+
+
+def normalize_app_language(language: str | None) -> str:
+    """Return a supported locale; invalid or missing values safely default to en-US."""
+    value = str(language or "").strip().replace("_", "-").casefold()
+    if value in {"en", "en-us", "english", "english (us)"}:
+        return "en-US"
+    if value in {"pt", "pt-br", "portuguese", "português", "portugues", "português (brasil)", "portugues (brasil)"}:
+        return "pt-BR"
+    return DEFAULT_APP_LANGUAGE
+
+
+def get_app_language() -> str:
+    """Persistent JARVIS interface/reply/speech language, independent of Windows."""
+    value = load_api_keys().get("app_language", DEFAULT_APP_LANGUAGE)
+    normalized = normalize_app_language(value)
+    return normalized if normalized in APP_LANGUAGES else DEFAULT_APP_LANGUAGE
+
+
+def save_app_language(language: str) -> None:
+    """Persist the selected JARVIS language without touching any other setting."""
+    value = str(language or "").strip()
+    if value not in APP_LANGUAGES:
+        raise ValueError(f"Unsupported JARVIS language: {value!r}")
+    _patch_config(app_language=value)
+
+
 def get_input_device() -> str:
     """Microphone device name, or '' for the system default."""
     return (load_api_keys().get("input_device", "") or "").strip()

@@ -1,6 +1,8 @@
 """Sequenced visual lessons with progressive drawing, captions and guided waits."""
 from __future__ import annotations
 
+from core.i18n import app_language, tr
+
 import copy
 import threading
 import time
@@ -318,7 +320,7 @@ def present_visual_lesson(parameters: dict, player=None, speak=None) -> str:
         try:
             player.show_visual_board(combined, operation="replace")
             player.set_visual_lesson_status(
-                f"{title} — acompanhe as etapas", 1, total, False,
+                title + " — " + ("follow the steps" if app_language() == "en-US" else "acompanhe as etapas"), 1, total, False,
                 draw_duration=reveal_seconds,
             )
         except Exception as exc:
@@ -330,7 +332,7 @@ def present_visual_lesson(parameters: dict, player=None, speak=None) -> str:
         extra = " " + " ".join(notes) if notes else ""
         if callable(start_audio):
             if not start_audio([beat["say"] for beat in prepared], title):
-                player.set_visual_lesson_status("Narração indisponível", 0, total, True)
+                player.set_visual_lesson_status(tr("Narração indisponível"), 0, total, True)
                 return "PRESENTATION_UNAVAILABLE: the lesson audio could not be registered."
             return (
                 f"PRESENTATION_SHOWN: {total} generated beats displayed; audio preparation started "
@@ -343,7 +345,7 @@ def present_visual_lesson(parameters: dict, player=None, speak=None) -> str:
             "Begin speaking immediately in one continuous response. The board starts blank "
             "and follows your live transcription and speaker audio. Use your currently "
             "selected Gemini Live voice (never Windows/SAPI or another local system voice). "
-            "Speak each caption verbatim in Brazilian Portuguese, exactly in order, with "
+            "Speak each caption verbatim in the selected JARVIS app language, exactly in order, with "
             "no paraphrase, no mentioning a later beat early, and no introduction beyond "
             "the one short opening sentence you already said. Captions: "
             + captions + "." + extra
@@ -374,8 +376,12 @@ def present_visual_lesson(parameters: dict, player=None, speak=None) -> str:
         if not beat["wait"]:
             continue
 
-        waiting_action = "clique" if beat["wait"] == "click" else "passagem do cursor"
-        waiting_caption = f"{beat['say']} — Aguardando {waiting_action} em {beat['target']}"
+        if app_language() == "en-US":
+            waiting_action = "click" if beat["wait"] == "click" else "hover"
+            waiting_caption = "{} — Waiting for {} on {}".format(beat["say"], waiting_action, beat["target"])
+        else:
+            waiting_action = "clique" if beat["wait"] == "click" else "passagem do cursor"
+            waiting_caption = "{} — Aguardando {} em {}".format(beat["say"], waiting_action, beat["target"])
         try:
             player.set_visual_lesson_status(waiting_caption, index, total, True)
             completed, outcome = _wait_for_click(
@@ -385,9 +391,12 @@ def present_visual_lesson(parameters: dict, player=None, speak=None) -> str:
         except Exception as exc:
             completed, outcome = False, f"{type(exc).__name__}: {str(exc)[:120]}"
         if not completed:
-            player.set_visual_lesson_status(
-                f"Etapa {index} pausada — {beat['target']}", index, total, True
+            paused_caption = (
+                "Step {} paused — {}".format(index, beat["target"])
+                if app_language() == "en-US"
+                else "Etapa {} pausada — {}".format(index, beat["target"])
             )
+            player.set_visual_lesson_status(paused_caption, index, total, True)
             return (
                 f"PRESENTATION_PAUSED: beat {index}/{total}; "
                 f"{outcome} The lesson remains on this step."
@@ -398,14 +407,14 @@ def present_visual_lesson(parameters: dict, player=None, speak=None) -> str:
             )
 
     try:
-        player.set_visual_lesson_status("Etapas concluídas", total, total, False)
+        player.set_visual_lesson_status(tr("Etapas concluídas"), total, total, False)
     except Exception:
         pass
     extra = " " + " ".join(notes) if notes else ""
     return (
         f"PRESENTATION_SHOWN: guided walkthrough displayed {shown}/{total} beats. "
         "The user completed the on-screen interactions. Now explain the captions in "
-        "Brazilian Portuguese using your currently selected Gemini Live voice. Captions: "
+        "the selected JARVIS app language using your currently selected Gemini Live voice. Captions: "
         + captions + "." + extra
     )
 

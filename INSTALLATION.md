@@ -9,6 +9,17 @@ The supported one-click installer is for **Windows 10/11 x64**.
 3. Launch JARVIS from the Start Menu shortcut.
 4. On first launch, enter your own Gemini API key and validate it.
 
+A clean installation uses **English (US)** by default. To change the app language,
+open **Settings → Identity → JARVIS language** and choose English (US) or
+Português (Brasil). The setting is stored locally and controls the interface,
+assistant replies, startup greeting and Gemini Live speech locale. It does not
+follow the Windows display language.
+
+
+### Background footprint
+
+When the desktop interface is idle or hibernated, JARVIS can keep only its optional wake-word companion active. The native Windows listener is designed for low CPU overhead; a single Task Manager snapshot showed 0.8% CPU and 21.4 MB RAM for JarvisWakeNative.exe. This is a point-in-time reading of that process only. Total usage depends on the PC and on which JARVIS modules or tasks are active. This can be useful when gaming or running other CPU-intensive foreground applications.
+
 The installer bundles the Python runtime and application dependencies. Python
 and Git are not required on the target computer. It does not turn on wake-word
 listening or register a Windows auto-start entry; both remain optional settings

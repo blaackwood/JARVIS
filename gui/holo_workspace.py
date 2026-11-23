@@ -51,6 +51,8 @@ class JARVISWorkspace(QWidget):
     def __init__(self, win, parent=None, embedded=False):
         super().__init__(parent)
         self.win = win
+        from memory.config_manager import get_app_language
+        self._language = get_app_language()
         self.embedded = bool(embedded)
         self._pages = {}
         self._panels = {}
@@ -156,6 +158,7 @@ class JARVISWorkspace(QWidget):
             signature.hide()
         self._build_overview()
         self.set_page("overview")
+        self._apply_translations()
         if parent is not None:
             parent.installEventFilter(self)
             self._fit_to_parent(parent)
@@ -226,6 +229,7 @@ class JARVISWorkspace(QWidget):
             key = "overview"
             page = self._pages[key]
         self.stack.setCurrentWidget(page)
+        self._apply_translations()
         for name, button in self._nav.items():
             on = name == key
             button.setChecked(on)
@@ -246,8 +250,75 @@ class JARVISWorkspace(QWidget):
                     border: 1px solid rgba(85,231,222,95);
                 }}
             """)
-        self.status.setText("●  %s" % dict(self.NAV).get(key, "SYSTEM ONLINE"))
+        status_source = "●  " + dict(self.NAV).get(key, "SYSTEM ONLINE")
+        self.status.setProperty("_jarvis_i18n_source", status_source)
+        status_text = self._tr(status_source)
+        self.status.setText(status_text)
+        self.status.setProperty("_jarvis_i18n_last_text", status_text)
         self.status.setStyleSheet(f"color:{CYAN};font-size:9px;font-weight:700;letter-spacing:1px;")
+
+    def set_language(self, language: str) -> None:
+        """Refresh every static label in the current live settings workspace."""
+        from memory.config_manager import normalize_app_language
+        self._language = normalize_app_language(language)
+        self._apply_translations()
+
+    def _tr(self, text):
+        from core.i18n import tr
+        return tr(text, self._language)
+
+    def _set_i18n_text(self, widget, source_text) -> None:
+        source = str(source_text or "")
+        translated = self._tr(source)
+        widget.setProperty("_jarvis_i18n_source", source)
+        widget.setText(translated)
+        widget.setProperty("_jarvis_i18n_last_text", translated)
+
+    def _apply_translations(self) -> None:
+        """Translate static widgets while leaving user-entered content untouched."""
+        from core.i18n import tr
+        for widget in [self, *self.findChildren(QWidget)]:
+            if isinstance(widget, (QLabel, QPushButton, QCheckBox)):
+                source = widget.property("_jarvis_i18n_source")
+                last = widget.property("_jarvis_i18n_last_text")
+                if source is None or (last is not None and widget.text() != last):
+                    source = widget.text()
+                    widget.setProperty("_jarvis_i18n_source", source)
+                translated = tr(source, self._language)
+                if widget.text() != translated:
+                    widget.setText(translated)
+                widget.setProperty("_jarvis_i18n_last_text", translated)
+                tip = widget.property("_jarvis_i18n_tooltip")
+                if tip is None:
+                    tip = widget.toolTip()
+                    widget.setProperty("_jarvis_i18n_tooltip", tip)
+                if tip:
+                    widget.setToolTip(tr(tip, self._language))
+            elif isinstance(widget, QLineEdit):
+                source = widget.property("_jarvis_i18n_placeholder")
+                last = widget.property("_jarvis_i18n_last_placeholder")
+                if source is None or (last is not None and widget.placeholderText() != last):
+                    source = widget.placeholderText()
+                    widget.setProperty("_jarvis_i18n_placeholder", source)
+                if source:
+                    translated = tr(source, self._language)
+                    widget.setPlaceholderText(translated)
+                    widget.setProperty("_jarvis_i18n_last_placeholder", translated)
+            elif isinstance(widget, QComboBox):
+                originals = widget.property("_jarvis_i18n_items")
+                if not isinstance(originals, list) or len(originals) != widget.count():
+                    originals = [widget.itemText(i) for i in range(widget.count())]
+                    widget.setProperty("_jarvis_i18n_items", originals)
+                current_data = widget.currentData()
+                current_index = widget.currentIndex()
+                for index, original in enumerate(originals):
+                    widget.setItemText(index, tr(original, self._language))
+                if current_data is not None:
+                    restored = widget.findData(current_data)
+                    if restored >= 0:
+                        widget.setCurrentIndex(restored)
+                elif current_index >= 0:
+                    widget.setCurrentIndex(current_index)
 
     def _make_page(self, key, title, detail):
         page = QWidget()
@@ -387,6 +458,11 @@ class JARVISWorkspace(QWidget):
         except Exception:
             cfg = {}
         name = (getattr(self.win, "_assistant_name", None) or cfg.get("assistant_name") or "JARVIS")
+        identity_detail = (
+            f"{name} · Nome, voz, aparência e motor de conversa."
+            if self._language == "pt-BR"
+            else f"{name} · Assistant name, voice, color and conversation mode."
+        )
         grid = QGridLayout()
         grid.setSpacing(12)
         cards = [
@@ -394,7 +470,7 @@ class JARVISWorkspace(QWidget):
             self._card("VOICE & AUDIO", "Microphone, speakers, voice route and input/output levels.", "CONFIGURE AUDIO  →", "audio", CYAN),
             self._card("MEMORY", "Inspect, search, update and remove stored memories.", "OPEN MEMORY  →", "memory", "#b49aff"),
             self._card("EXTENSIONS", "Installed plugins, capabilities and their configuration.", "MANAGE EXTENSIONS  →", "plugins", "#ffb45d"),
-            self._card("IDENTITY", "%s · Assistant name, voice, color and conversation mode." % name, "CUSTOMIZE JARVIS  →", "identity", "#77b9ff"),
+            self._card("IDENTITY", identity_detail, "CUSTOMIZE JARVIS  →", "identity", "#77b9ff"),
             self._card("REMOTE ACCESS", "Secure access session and device pairing.", "OPEN REMOTE  →", "remote", "#ff829d"),
         ]
         for i, card in enumerate(cards):
@@ -595,7 +671,8 @@ class JARVISWorkspace(QWidget):
 
     def _build_identity_panel(self, parent):
         from gui.theme import DEFAULT_UI_COLOR, _read_full_config
-        from memory.config_manager import AVAILABLE_VOICES, DEFAULT_VOICE, get_provider_mode
+        from memory.config_manager import AVAILABLE_VOICES, DEFAULT_VOICE, get_provider_mode, get_app_language
+        from core.i18n import LANGUAGE_CHOICES, tr
         cfg = _read_full_config()
         frame, root = self._module_frame(
             parent, "Assistant identity",
@@ -618,6 +695,14 @@ class JARVISWorkspace(QWidget):
         engine.setCurrentIndex(max(0, engine.findData(current_mode)))
         self._field(form, "Assistant voice", voice)
         self._field(form, "Conversation engine", engine)
+        language = QComboBox()
+        for label, code in LANGUAGE_CHOICES:
+            language.addItem(label, code)
+        language.setCurrentIndex(max(0, language.findData(get_app_language())))
+        self._field(
+            form, "JARVIS language", language,
+            "Choose the language used for the interface, assistant replies and speech."
+        )
         card, form = self._section_card(root, "Visual identity", "Set the accent color used by the JARVIS HUD and controls.")
         color = QLineEdit(str(cfg.get("ui_color") or DEFAULT_UI_COLOR))
         color.setPlaceholderText("#8262ff")
@@ -641,28 +726,30 @@ class JARVISWorkspace(QWidget):
         buttons = QHBoxLayout()
         buttons.addStretch(1)
         save = self._action_button("SAVE IDENTITY", CYAN, True)
-        save.clicked.connect(lambda: self._save_identity(name, user, color, voice, engine, key, status))
+        save.clicked.connect(lambda: self._save_identity(name, user, color, voice, engine, language, key, status))
         buttons.addWidget(save)
         root.addLayout(buttons)
         return frame
 
-    def _save_identity(self, name, user, color, voice, engine, key, status):
+    def _save_identity(self, name, user, color, voice, engine, language, key, status):
         hex_color = color.text().strip() or "#8262ff"
+        from core.i18n import tr
         if len(hex_color) != 7 or not hex_color.startswith("#"):
-            status.setText("Use a valid hexadecimal color, for example #8262ff.")
+            self._set_i18n_text(status, "Use a valid hexadecimal color, for example #8262ff.")
             status.setStyleSheet(f"color:{DANGER};background:transparent;")
             return
         try:
             int(hex_color[1:], 16)
         except ValueError:
-            status.setText("Use a valid hexadecimal color, for example #8262ff.")
+            self._set_i18n_text(status, "Use a valid hexadecimal color, for example #8262ff.")
             status.setStyleSheet(f"color:{DANGER};background:transparent;")
             return
         self.win._apply_name_update(
             name.text().strip(), user.text().strip(), hex_color,
-            voice.currentText(), engine.currentData(), key.text().strip()
+            voice.currentText(), engine.currentData(), key.text().strip(),
+            language.currentData()
         )
-        status.setText("Identity saved. The JARVIS interface has been updated.")
+        self._set_i18n_text(status, "Identity saved. The JARVIS interface has been updated.")
         status.setStyleSheet(f"color:{CYAN};background:transparent;")
 
     def _build_setup_panel(self, parent):
@@ -735,15 +822,15 @@ class JARVISWorkspace(QWidget):
     def _start_setup_validation(self, key_widget, os_box, status, button):
         key = key_widget.text().strip()
         if len(key) < 20:
-            status.setText("Paste a complete Gemini API key before continuing.")
+            self._set_i18n_text(status, "Paste a complete Gemini API key before continuing.")
             status.setStyleSheet(f"color:{DANGER};background:transparent;")
             key_widget.setFocus()
             return
 
         os_name = os_box.currentData()
         button.setEnabled(False)
-        button.setText("VALIDATING WITH GOOGLE...")
-        status.setText("Checking the API key securely. The secret is not displayed or logged.")
+        self._set_i18n_text(button, "VALIDATING WITH GOOGLE...")
+        self._set_i18n_text(status, "Checking the API key securely. The secret is not displayed or logged.")
         status.setStyleSheet(f"color:{MUTED};background:transparent;")
 
         def worker():
@@ -777,13 +864,11 @@ class JARVISWorkspace(QWidget):
         button = result.get("button")
         if button is not None:
             button.setEnabled(True)
-            button.setText("VALIDATE AND CONNECT")
+            self._set_i18n_text(button, "VALIDATE AND CONNECT")
 
         if not result.get("ok"):
             if status is not None:
-                status.setText(
-                    str(result.get("message") or "The API key could not be validated.")
-                )
+                self._set_i18n_text(status, str(result.get("message") or "The API key could not be validated."))
                 status.setStyleSheet(f"color:{DANGER};background:transparent;")
             return
 
@@ -795,10 +880,7 @@ class JARVISWorkspace(QWidget):
             )
         except Exception as exc:
             if status is not None:
-                status.setText(
-                    "The API key was validated, but local setup could not be saved: "
-                    + type(exc).__name__
-                )
+                self._set_i18n_text(status, "The API key was validated, but local setup could not be saved: " + type(exc).__name__)
                 status.setStyleSheet(f"color:{DANGER};background:transparent;")
             return
 
@@ -806,7 +888,7 @@ class JARVISWorkspace(QWidget):
         if key_widget is not None:
             key_widget.clear()
         if status is not None:
-            status.setText("API key validated and saved locally. JARVIS is ready.")
+            self._set_i18n_text(status, "API key validated and saved locally. JARVIS is ready.")
             status.setStyleSheet(f"color:{CYAN};background:transparent;")
         self.set_page("overview")
 
@@ -882,7 +964,7 @@ class JARVISWorkspace(QWidget):
 
     def _run_audio_test(self, kind, name, button, status):
         button.setEnabled(False)
-        status.setText("Testing…")
+        self._set_i18n_text(status, "Testing…")
         status.setStyleSheet(f"color:{MUTED};background:transparent;")
         self._audio_test_widgets[kind] = (button, status)
         def worker():
@@ -900,18 +982,18 @@ class JARVISWorkspace(QWidget):
         if button is not None:
             button.setEnabled(True)
         if status is not None:
-            status.setText(message)
+            self._set_i18n_text(status, message)
             status.setStyleSheet(f"color:{CYAN if ok else DANGER};background:transparent;")
 
     def _save_output_volume(self, value, name, status):
         try:
             from core.audio_devices import set_output_volume
             if set_output_volume(value, name):
-                status.setText("Output level updated.")
+                self._set_i18n_text(status, "Output level updated.")
             else:
-                status.setText("The selected output does not expose a software volume control.")
+                self._set_i18n_text(status, "The selected output does not expose a software volume control.")
         except Exception as exc:
-            status.setText("Could not change output level: " + str(exc)[:140])
+            self._set_i18n_text(status, "Could not change output level: " + str(exc)[:140])
 
     def _save_audio_devices(self, inp, out, status):
         try:
@@ -919,10 +1001,10 @@ class JARVISWorkspace(QWidget):
             save_input_device(inp.currentData() or "")
             save_output_device(out.currentData() or "")
             self.win._on_audio_devices_applied()
-            status.setText("Devices saved. JARVIS is reconnecting to the selected audio path.")
+            self._set_i18n_text(status, "Devices saved. JARVIS is reconnecting to the selected audio path.")
             status.setStyleSheet(f"color:{CYAN};background:transparent;")
         except Exception as exc:
-            status.setText("Could not save audio devices: " + str(exc)[:180])
+            self._set_i18n_text(status, "Could not save audio devices: " + str(exc)[:180])
             status.setStyleSheet(f"color:{DANGER};background:transparent;")
 
     def _build_memory_panel(self, parent):
@@ -977,7 +1059,13 @@ class JARVISWorkspace(QWidget):
                      q in str(r.get("value", "")).casefold() or
                      q in str(r.get("category", "")).casefold() or
                      q in str(r.get("updated", "")).casefold())]
-            summary.setText(f"{len(rows)} of {len(all_entries_for_ui())} entries shown · newest first · stored on this computer")
+            total_entries = len(all_entries_for_ui())
+            summary_text = (
+                f"{len(rows)} de {total_entries} registros exibidos · mais recentes primeiro · salvos neste computador"
+                if self._language == "pt-BR"
+                else f"{len(rows)} of {total_entries} entries shown · newest first · stored on this computer"
+            )
+            summary.setText(summary_text)
             if not rows:
                 empty = QLabel("No memories match this filter.")
                 empty.setStyleSheet(f"color:{MUTED};background:transparent;padding:18px;")
@@ -1016,6 +1104,7 @@ class JARVISWorkspace(QWidget):
                 row_l.addLayout(buttons)
                 rows_layout.addWidget(item_card)
             rows_layout.addStretch(1)
+            self._apply_translations()
         search.textChanged.connect(refresh)
         category.currentIndexChanged.connect(refresh)
         refresh()
@@ -1023,51 +1112,51 @@ class JARVISWorkspace(QWidget):
 
     def _edit_memory_entry(self, row, refresh):
         from memory.memory_manager import save_memory_item
-        value, ok = QInputDialog.getMultiLineText(self, "Edit memory", str(row.get("key", "")), str(row.get("value", "")))
+        value, ok = QInputDialog.getMultiLineText(self, self._tr("Edit memory"), str(row.get("key", "")), str(row.get("value", "")))
         if not ok or not value.strip() or value.strip() == str(row.get("value", "")):
             return
-        answer = QMessageBox.question(self, "Confirm update", "Replace this saved memory item?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
+        answer = QMessageBox.question(self, self._tr("Confirm update"), self._tr("Replace this saved memory item?"), QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
         if answer != QMessageBox.StandardButton.Yes:
             return
         try:
             result = save_memory_item(str(row["category"]), str(row["key"]), value.strip(), confirm_overwrite=True)
             if result.get("status") in {"duplicate", "possible_duplicate"}:
-                duplicate = QMessageBox.question(self, "Possible duplicate", "This memory resembles another saved entry. Store it anyway?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
+                duplicate = QMessageBox.question(self, self._tr("Possible duplicate"), self._tr("This memory resembles another saved entry. Store it anyway?"), QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
                 if duplicate != QMessageBox.StandardButton.Yes:
                     return
                 result = save_memory_item(str(row["category"]), str(row["key"]), value.strip(), confirm_overwrite=True, confirm_duplicate=True)
             if result.get("status") != "saved":
-                QMessageBox.warning(self, "Memory unchanged", "The item was not updated: " + str(result.get("status")))
+                QMessageBox.warning(self, self._tr("Memory unchanged"), self._tr("The item was not updated: ") + str(result.get("status")))
                 return
         except Exception as exc:
-            QMessageBox.warning(self, "Memory error", str(exc))
+            QMessageBox.warning(self, self._tr("Memory error"), str(exc))
             return
         refresh()
 
     def _forget_memory_entry(self, row, refresh):
-        answer = QMessageBox.question(self, "Confirm deletion", "Forget this saved memory?\n\n" + str(row.get("key", "")), QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
+        answer = QMessageBox.question(self, self._tr("Confirm deletion"), self._tr("Forget this saved memory?") + "\n\n" + str(row.get("key", "")), QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
         if answer != QMessageBox.StandardButton.Yes:
             return
         from memory.memory_manager import forget
         result = forget(str(row.get("key", "")), str(row.get("category", "notes")))
         if not str(result).startswith("Forgotten:"):
-            QMessageBox.warning(self, "Memory unchanged", str(result))
+            QMessageBox.warning(self, self._tr("Memory unchanged"), str(result))
             return
         refresh()
 
     def _import_memory_note(self):
-        title, ok = QInputDialog.getText(self, "Import memory", "Short title:")
+        title, ok = QInputDialog.getText(self, self._tr("Import memory"), self._tr("Short title:"))
         if not ok or not title.strip():
             return
-        content, ok = QInputDialog.getMultiLineText(self, "Import memory", "Paste information JARVIS should remember (up to 12,000 characters):")
+        content, ok = QInputDialog.getMultiLineText(self, self._tr("Import memory"), self._tr("Paste information JARVIS should remember (up to 12,000 characters):"))
         if not ok or not content.strip():
             return
         try:
             from memory.memory_manager import import_memory_text
             result = import_memory_text(title.strip(), content)
-            QMessageBox.information(self, "Memory imported", f"Saved {result.get('entries', 0)} searchable memory part(s).")
+            QMessageBox.information(self, self._tr("Memory imported"), f"Saved {result.get('entries', 0)} searchable memory part(s).")
         except Exception as exc:
-            QMessageBox.warning(self, "Import failed", str(exc))
+            QMessageBox.warning(self, self._tr("Import failed"), str(exc))
 
     def _build_plugins_panel(self, parent):
         from memory.config_manager import save_plugin_enabled
@@ -1076,7 +1165,12 @@ class JARVISWorkspace(QWidget):
             parent, "Extensions",
             "Enable or disable installed JARVIS capabilities. Changes are stored in the local configuration."
         )
-        card, body = self._section_card(root, "Installed extensions", f"{len(plugins)} modules discovered")
+        discovered = (
+            f"{len(plugins)} módulos encontrados"
+            if self._language == "pt-BR"
+            else f"{len(plugins)} modules discovered"
+        )
+        card, body = self._section_card(root, "Installed extensions", discovered)
         if not plugins:
             body.addWidget(self._status_label("No extensions were discovered in the plugins folder."))
             return frame
@@ -1100,7 +1194,7 @@ class JARVISWorkspace(QWidget):
             toggle.setChecked(bool(plugin.get("enabled", True)))
             toggle.setMinimumWidth(72)
             if not plugin.get("valid", True):
-                toggle.setText("ERROR")
+                self._set_i18n_text(toggle, "ERROR")
                 toggle.setEnabled(False)
             else:
                 toggle.clicked.connect(lambda checked, n=str(plugin.get("name")), b=toggle: self._toggle_plugin(n, checked, b))
@@ -1112,7 +1206,7 @@ class JARVISWorkspace(QWidget):
         from memory.config_manager import save_plugin_enabled
         try:
             save_plugin_enabled(name, bool(enabled))
-            button.setText("ON" if enabled else "OFF")
+            self._set_i18n_text(button, "ON" if enabled else "OFF")
             button.setStyleSheet(f"QPushButton{{color:{TEXT};background:{'rgba(55,205,199,42)' if enabled else SURFACE_2};border:1px solid {CYAN if enabled else VIOLET};border-radius:9px;padding:7px 14px;font-size:9px;font-weight:800;}}")
         except Exception as exc:
             button.setChecked(not enabled)
@@ -1195,19 +1289,19 @@ class JARVISWorkspace(QWidget):
             save_plugin_config(namespace, self._gather_plugin_settings(namespace))
             status = self._plugin_status_labels.get(namespace)
             if status:
-                status.setText("Settings saved.")
+                self._set_i18n_text(status, "Settings saved.")
                 status.setStyleSheet(f"color:{CYAN};background:transparent;")
         except Exception as exc:
             status = self._plugin_status_labels.get(namespace)
             if status:
-                status.setText("Could not save settings: " + str(exc)[:160])
+                self._set_i18n_text(status, "Could not save settings: " + str(exc)[:160])
                 status.setStyleSheet(f"color:{DANGER};background:transparent;")
 
     def _run_plugin_test(self, namespace, runner):
         self._save_plugin_settings(namespace)
         status = self._plugin_status_labels.get(namespace)
         if status:
-            status.setText("Testing…")
+            self._set_i18n_text(status, "Testing…")
         values = self._gather_plugin_settings(namespace)
         import threading
         def worker():
@@ -1225,7 +1319,7 @@ class JARVISWorkspace(QWidget):
     def _on_plugin_test_finished(self, namespace, ok, message):
         status = self._plugin_status_labels.get(namespace)
         if status:
-            status.setText(message)
+            self._set_i18n_text(status, message)
             status.setStyleSheet(f"color:{CYAN if ok else DANGER};background:transparent;")
 
     def _build_remote_panel(self, parent):

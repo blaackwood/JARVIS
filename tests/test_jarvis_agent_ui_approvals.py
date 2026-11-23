@@ -97,7 +97,7 @@ class JarvisAgentApprovalScopeTests(unittest.TestCase):
         for command in (
             "python -m unittest -v; Remove-Item important.txt",
             "python -m unittest ..\\outside",
-            "python -m unittest C:\\Users\\bwd\\secret.py",
+            "python -m unittest C:\\Users\\user\\secret.py",
             "npm install",
             "Remove-Item src\\file.py",
             "python -c print(1)",

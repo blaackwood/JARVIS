@@ -2,6 +2,8 @@
 import math
 import time
 
+from core.i18n import tr
+
 import numpy as np
 from PyQt6.QtCore import QLineF, QPointF, QRectF, Qt
 from PyQt6.QtGui import QColor, QFont, QFontMetrics, QPainter, QPainterPath, QPen, QRadialGradient
@@ -35,6 +37,10 @@ def mixc(a, b, m):
 
 
 class HoloMixin:
+    def _tr(self, text):
+        """Translate a fixed interface label without translating user content."""
+        return tr(text, getattr(self, "_language", None))
+
     # ------------------------------------------------------------ setup
     def init_extras(self):
         self.muted = False
@@ -226,7 +232,7 @@ class HoloMixin:
         p.drawText(QRectF(66, 24, 200, 16), AL.AlignLeft, getattr(self, "name", "JARVIS"))
         # estado: bolinha pulsando + texto legivel
         col = RED if self.muted else self.acc
-        label = "MUDO" if self.muted else self.STATES[self.state][0]
+        label = self._tr("MUDO" if self.muted else self.STATES[self.state][0])
         pulse = 0.6 + 0.4 * math.sin(self.t * 4)
         p.setPen(NO)
         p.setBrush(qc(col, pulse))
@@ -234,7 +240,7 @@ class HoloMixin:
         p.setBrush(NB)
         p.setFont(self.f_sub)
         p.setPen(qc(col, 1.0))
-        p.drawText(QRectF(80, 44, 160, 16), AL.AlignLeft | AL.AlignVCenter, label)
+        p.drawText(QRectF(80, 44, 160, 16), AL.AlignLeft | AL.AlignVCenter, self._tr(label))
         # direita: botoes + data/hora
         x_fs = W - 28 - 34
         x_stop = x_fs - 42
@@ -246,8 +252,15 @@ class HoloMixin:
         dx = x_mute - 14 - 96
         p.setFont(self.f_date)
         p.setPen(qc(self.acc, 0.95))
-        p.drawText(QRectF(dx, 18, 96, 16), AL.AlignRight | AL.AlignVCenter,
-                   "%s · %02d %s" % (DIAS[lt.tm_wday], lt.tm_mday, MESES[lt.tm_mon - 1]))
+        day_names, month_names = DIAS, MESES
+        if getattr(self, "_language", None) == "en-US":
+            day_names = ("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN")
+            month_names = ("JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+                           "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
+        p.drawText(
+            QRectF(dx, 18, 96, 16), AL.AlignRight | AL.AlignVCenter,
+            "%s · %02d %s" % (day_names[lt.tm_wday], lt.tm_mday, month_names[lt.tm_mon - 1])
+        )
         p.setFont(self.f_clock)
         p.setPen(QColor(255, 255, 255, 235))
         p.drawText(QRectF(dx, 34, 96, 22), AL.AlignRight | AL.AlignVCenter, time.strftime("%H:%M"))
@@ -275,7 +288,7 @@ class HoloMixin:
             p.setFont(self.f_tab)
             p.setPen(QColor(255, 255, 255, 255 if act else 160))
             off = 9 if badge else 0
-            p.drawText(QRectF(r.x() - off, r.y(), r.width(), r.height()), AL.AlignCenter, label)
+            p.drawText(QRectF(r.x() - off, r.y(), r.width(), r.height()), AL.AlignCenter, self._tr(label))
             if badge:
                 bc = QPointF(r.right() - 19, r.center().y())
                 p.setPen(NO)
@@ -464,7 +477,7 @@ class HoloMixin:
         p.setFont(self.f_body)
         p.setPen(QColor(255, 255, 255, 170))
         p.drawText(QRectF(x0, y0, 700, 30), AL.AlignLeft | AL.AlignVCenter,
-                   title or "Controles rápidos do assistente (clique para alternar)")
+                   self._tr(title or "Controles rápidos do assistente (clique para alternar)"))
         cols = 4 if W >= 1100 else 3
         gap = 14.0
         cw = (W - 56 - gap * (cols - 1)) / cols
@@ -491,17 +504,17 @@ class HoloMixin:
                         muted=(it["k"] == "mute" and self.muted))
             p.setFont(self.f_ctl)
             p.setPen(QColor(255, 255, 255, 240))
-            p.drawText(QRectF(r.x() + 70, r.y() + 16, cw - 84, 20), AL.AlignLeft | AL.AlignVCenter, it["t"])
+            p.drawText(QRectF(r.x() + 70, r.y() + 16, cw - 84, 20), AL.AlignLeft | AL.AlignVCenter, self._tr(it["t"]))
             p.setFont(self.f_meta)
             p.setPen(QColor(255, 255, 255, 120))
             p.drawText(QRectF(r.x() + 70, r.y() + 38, cw - 84, 30), AL.AlignLeft | AL.AlignTop
-                       | Qt.TextFlag.TextWordWrap, it["d"])
+                       | Qt.TextFlag.TextWordWrap, self._tr(it["d"]))
             if it["kind"] == "sw":
                 self._switch(p, r.right() - 16 - 42, r.bottom() - 32, on, c)
                 p.setFont(mk_font(8, True, 1.4))
                 p.setPen(qc(c, 0.95) if on else QColor(255, 255, 255, 110))
                 p.drawText(QRectF(r.x() + 70, r.bottom() - 32, 90, 22), AL.AlignLeft | AL.AlignVCenter,
-                           "LIGADO" if on else "DESLIGADO")
+                           self._tr("LIGADO" if on else "DESLIGADO"))
             else:
                 p.setFont(mk_font(8, True, 1.4))
                 fm = QFontMetrics(p.font())
@@ -514,7 +527,7 @@ class HoloMixin:
                 p.setPen(QPen(qc(c, 0.6), 1))
                 p.drawPath(cp)
                 p.setPen(qc(c, 1.0))
-                p.drawText(cr, AL.AlignCenter, it["lbl"])
+                p.drawText(cr, AL.AlignCenter, button_label)
             self._hit(r, it["fn"], ("ctl", it["k"]))
 
     # ----------------------------------------------------- configuracoes
@@ -524,7 +537,7 @@ class HoloMixin:
         p.setFont(self.f_body)
         p.setPen(QColor(255, 255, 255, 170))
         p.drawText(QRectF(x0, y0, 700, 30), AL.AlignLeft | AL.AlignVCenter,
-                   "Configurações do Jarvis")
+                   self._tr("Configurações do Jarvis"))
         ty = y0 + 36
         avail = H - 110 - ty
         n = len(self.sets)
@@ -542,13 +555,13 @@ class HoloMixin:
             p.setFont(self.f_body)
             p.setPen(QColor(255, 255, 255, 255 if act else 190))
             p.drawText(QRectF(r.x() + 16, r.y(), lw - 70, ih), AL.AlignLeft | AL.AlignVCenter,
-                       QFontMetrics(self.f_body).elidedText(s["t"], Qt.TextElideMode.ElideRight, int(lw - 74)))
+                       QFontMetrics(self.f_body).elidedText(self._tr(s["t"]), Qt.TextElideMode.ElideRight, int(lw - 74)))
             row0 = s["rows"][0]
             tag = ("ON" if row0["i"] else "OFF") if row0["o"] == ONOFF else "›"
             on = tag == "ON"
             p.setFont(mk_font(8, True, 1.4))
             p.setPen(qc((60, 255, 200), 0.95) if on else QColor(255, 255, 255, 110))
-            p.drawText(QRectF(r.right() - 50, r.y(), 36, ih), AL.AlignRight | AL.AlignVCenter, tag)
+            p.drawText(QRectF(r.right() - 50, r.y(), 36, ih), AL.AlignRight | AL.AlignVCenter, self._tr(tag))
             self._hit(r, lambda k=i: setattr(self, "set_sel", k), ("set", i))
         dx = x0 + lw + 18
         dw = W - 28 - dx
@@ -565,10 +578,10 @@ class HoloMixin:
         p.drawLine(QPointF(dx + 22, ty + 0.5), QPointF(dx + 62, ty + 0.5))
         p.setFont(self.f_big)
         p.setPen(QColor(255, 255, 255, 245))
-        p.drawText(QRectF(dx + 22, ty + 18, dw - 44, 26), AL.AlignLeft | AL.AlignVCenter, s["t"])
+        p.drawText(QRectF(dx + 22, ty + 18, dw - 44, 26), AL.AlignLeft | AL.AlignVCenter, self._tr(s["t"]))
         p.setFont(self.f_body)
         p.setPen(QColor(255, 255, 255, 135))
-        p.drawText(QRectF(dx + 22, ty + 48, dw - 44, 22), AL.AlignLeft | AL.AlignVCenter, s["d"])
+        p.drawText(QRectF(dx + 22, ty + 48, dw - 44, 22), AL.AlignLeft | AL.AlignVCenter, self._tr(s["d"]))
         ry = ty + 88
         for j, row in enumerate(s["rows"]):
             rr = QRectF(dx + 22, ry + j * 62, dw - 44, 52)
@@ -580,8 +593,8 @@ class HoloMixin:
             p.setFont(self.f_body)
             p.setPen(QColor(255, 255, 255, 220))
             p.drawText(QRectF(rr.x() + 18, rr.y(), rr.width() * 0.5, rr.height()), AL.AlignLeft | AL.AlignVCenter,
-                       row["l"])
-            val = row["o"][row["i"]]
+                       self._tr(row["l"]))
+            val = self._tr(row["o"][row["i"]])
             if row["o"] == ONOFF:
                 self._switch(p, rr.right() - 18 - 42, rr.y() + 15, bool(row["i"]), (60, 255, 200))
             elif len(row["o"]) == 1:

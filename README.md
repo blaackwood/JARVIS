@@ -13,7 +13,7 @@
 
 <p align="center"><strong>A real JARVIS on your desktop: live voice, computer control and 3D lessons on any topic.</strong></p>
 
-**Windows 10/11 · 64-bit · v0.1.0**
+**Windows 10/11 · 64-bit · v0.2.0**
 
 **[Download the JARVIS Windows installer](https://github.com/blaackwood/JARVIS/releases/latest/download/JARVIS-Setup.exe)** · [All releases](https://github.com/blaackwood/JARVIS/releases) · about 435 MB
 
@@ -38,6 +38,20 @@ remote integrations.
 The main conversation engine is Google Gemini Live. Every installation must
 use the installing user's own Gemini API key. No developer key, personal
 memory, conversation archive, or local account configuration is included.
+
+## Language selection
+
+A clean installation starts in **English (US)**. Open **Settings → Identity →
+JARVIS language** to switch between English (US) and **Português (Brasil)**.
+The preference is saved locally for that installation and controls the desktop
+interface, assistant replies, startup greeting, Gemini Live speech locale and
+visual-lesson narration. It is independent of the Windows display language.
+Only these two locales are currently bundled; the language catalogue is
+designed to accept additional translations.
+
+## Lightweight background operation
+
+JARVIS is designed to keep its background footprint low when the full desktop interface is idle or hibernated. On Windows, the optional native wake-word companion runs separately so the main interface does not need to remain active just to wait for its wake phrase. In one Windows Task Manager observation, JarvisWakeNative.exe used **0.8% CPU and 21.4 MB of RAM**. That is a snapshot of the native listener process only, not a benchmark of every JARVIS component or a guarantee for every PC. Actual resource use varies with hardware, drivers, audio activity, enabled modules and running tasks. The goal is to let JARVIS coexist comfortably with gaming, streaming and other demanding foreground work.
 
 ## See it in action
 

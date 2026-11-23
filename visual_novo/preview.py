@@ -61,7 +61,7 @@ class NovoVisual(HoloMixin, QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("JARVIS - novo visual (previa)")
+        self.setWindowTitle(self._tr("JARVIS - novo visual (previa)"))
         self.resize(1280, 780)
         self.setMinimumSize(1000, 640)
         self.state = "idle"
@@ -120,7 +120,7 @@ class NovoVisual(HoloMixin, QWidget):
         if s == self.state:
             return
         self.state = s
-        self.log.append((time.strftime("%H:%M:%S"), LOGTXT[s]))
+        self.log.append((time.strftime("%H:%M:%S"), self._tr(LOGTXT[s])))
         self.log = self.log[-14:]
 
     def keyPressEvent(self, e):
@@ -383,7 +383,7 @@ class NovoVisual(HoloMixin, QWidget):
         p.drawText(QRectF(cx - 300, y, 600, 44), al, getattr(self, "name", "JARVIS"))
         p.setFont(self.f_state)
         p.setPen(qc(self.acc, 0.95))
-        p.drawText(QRectF(cx - 300, y + 42, 600, 22), al, STATES[self.state][0])
+        p.drawText(QRectF(cx - 300, y + 42, 600, 22), al, self._tr(STATES[self.state][0]))
 
     def _topbar_old(self, p, W):
         c = QPointF(44, 40)
@@ -403,7 +403,7 @@ class NovoVisual(HoloMixin, QWidget):
         p.setPen(QColor(255, 255, 255, 215))
         p.drawText(QRectF(66, 26, 300, 16), Qt.AlignmentFlag.AlignLeft, "JARVIS")
         p.setPen(QColor(255, 255, 255, 90))
-        p.drawText(QRectF(66, 42, 300, 14), Qt.AlignmentFlag.AlignLeft, "JARVIS SYSTEMS  ·  DESKTOP")
+        p.drawText(QRectF(66, 42, 300, 14), Qt.AlignmentFlag.AlignLeft, self._tr("JARVIS SYSTEMS  ·  DESKTOP"))
         p.setFont(self.f_body)
         p.setPen(QColor(255, 255, 255, 190))
         p.drawText(QRectF(W - 28 - 80, 26, 80, 26), Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
@@ -423,7 +423,7 @@ class NovoVisual(HoloMixin, QWidget):
         p.setFont(self.f_small)
         p.setPen(qc(self.acc, 1.0))
         p.drawText(QRectF(r.x() + 26, r.y(), pw - 30, r.height()),
-                   Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, STATES[self.state][0])
+                   Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, self._tr(STATES[self.state][0]))
 
     def _signature(self, p, W, H):
         """Subtle creator credit, anchored to the lower-right edge."""
@@ -448,7 +448,7 @@ class NovoVisual(HoloMixin, QWidget):
         p.drawLine(QPointF(x + 16, y + 0.5), QPointF(x + 46, y + 0.5))
         p.setFont(self.f_small)
         p.setPen(QColor(255, 255, 255, 125))
-        p.drawText(QRectF(x + 16, y + 12, w - 32, 16), Qt.AlignmentFlag.AlignLeft, title)
+        p.drawText(QRectF(x + 16, y + 12, w - 32, 16), Qt.AlignmentFlag.AlignLeft, self._tr(title))
 
     def _left(self, p, x, y, w):
         self._card(p, x, y, w, 152, "SISTEMA")
@@ -456,7 +456,7 @@ class NovoVisual(HoloMixin, QWidget):
             yy = y + 42 + i * 34
             p.setFont(self.f_body)
             p.setPen(QColor(255, 255, 255, 170))
-            p.drawText(QRectF(x + 16, yy, w - 32, 16), Qt.AlignmentFlag.AlignLeft, n)
+            p.drawText(QRectF(x + 16, yy, w - 32, 16), Qt.AlignmentFlag.AlignLeft, self._tr(n))
             p.drawText(QRectF(x + 16, yy, w - 32, 16), Qt.AlignmentFlag.AlignRight, "%d%%" % round(v))
             tr = QRectF(x + 16, yy + 20, w - 32, 5)
             pt = QPainterPath()
@@ -472,9 +472,10 @@ class NovoVisual(HoloMixin, QWidget):
             p.fillPath(pf, gr)
 
         y2 = y + 168
-        self._card(p, x, y2, w, 176, "MODULOS")
+        self._card(p, x, y2, w, 176, "MÓDULOS")
         cw = (w - 44) / 2.0
         for i, m in enumerate(MODULES):
+            m = self._tr(m)
             r = QRectF(x + 16 + (i % 2) * (cw + 12), y2 + 40 + (i // 2) * 42, cw, 32)
             pp = QPainterPath()
             pp.addRoundedRect(r, 10, 10)
@@ -485,7 +486,7 @@ class NovoVisual(HoloMixin, QWidget):
             p.setFont(self.f_body)
             p.setPen(QColor(255, 255, 255, 205))
             p.drawText(QRectF(r.x() + 24, r.y(), cw - 26, r.height()),
-                       Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, m)
+                       Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, self._tr(m))
 
     def _right(self, p, x, y, w, h):
         self._card(p, x, y, w, h, "ATIVIDADE")
@@ -523,7 +524,7 @@ class NovoVisual(HoloMixin, QWidget):
             p.setFont(self.f_body)
             p.setPen(QColor(255, 255, 255, int(235 * a)))
             for line in wrapped:
-                p.drawText(QPointF(x + 16, yy + fm.ascent()), line)
+                p.drawText(QPointF(x + 16, yy + fm.ascent()), self._tr(line))
                 yy += fm.lineSpacing()
             yy += 6
 
@@ -556,7 +557,7 @@ class NovoVisual(HoloMixin, QWidget):
         p.setFont(self.f_body)
         p.setPen(QColor(255, 255, 255, 105))
         p.drawText(QRectF(x + 62, y, w - 120, h), Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
-                   "" if getattr(self, "live", False) else "Fale com o Jarvis ou digite um comando...")
+                   "" if getattr(self, "live", False) else self._tr("Fale com o Jarvis ou digite um comando..."))
         sc = QPointF(x + w - 30, y + h / 2)
         p.setPen(Qt.PenStyle.NoPen)
         p.setBrush(qc(self.col, 0.95))
@@ -568,7 +569,7 @@ class NovoVisual(HoloMixin, QWidget):
         p.setFont(mk_font(8))
         p.setPen(QColor(255, 255, 255, 70))
         p.drawText(QRectF(0, y + h + 10, W, 16), Qt.AlignmentFlag.AlignHCenter,
-                   "" if getattr(self, "live", False) else "1-4 estados  N notícias  S pesquisa  H início  T tarefas  R rotinas  C controles  G config  M mudo  I interromper  O esfera  Espaço demo  F11  Esc")
+                   "" if getattr(self, "live", False) else self._tr("1-4 estados  N noticias  S pesquisa  H inicio  T tarefas  R rotinas  C controles  G config  M mutar  I interromper  O esfera  Espaco demo  F11 tela cheia  Esc sair"))
 
 
 
@@ -768,7 +769,7 @@ class NovoVisual(HoloMixin, QWidget):
         p.fillPath(pc, qc(self.acc, 0.16))
         p.setFont(self.f_small)
         p.setPen(qc(self.acc, 1.0))
-        p.drawText(chip, Qt.AlignmentFlag.AlignCenter, c["kind"])
+        p.drawText(chip, Qt.AlignmentFlag.AlignCenter, self._tr(c["kind"]))
         fh = QFontMetrics(self.f_head)
         tx = x + 16 + chipw + 12
         tw = w - (tx - x) - 152
@@ -851,7 +852,7 @@ class NovoVisual(HoloMixin, QWidget):
             p.setFont(self.f_meta)
             fm_ = QFontMetrics(self.f_meta)
             p.setPen(QColor(255, 255, 255, 110))
-            p.drawText(QPointF(xx, yy + 14), "FONTES" if c.get("sources") else "")
+            p.drawText(QPointF(xx, yy + 14), self._tr("FONTES") if c.get("sources") else "")
             xx += 58
             for s_ in c.get("sources", []):
                 sw = fm_.horizontalAdvance(s_) + 20
@@ -892,8 +893,16 @@ class NovoVisual(HoloMixin, QWidget):
         n = [sum(1 for t in self.tasks if t["st"] == i) for i in range(3)]
         p.setFont(self.f_body)
         p.setPen(QColor(255, 255, 255, 170))
-        p.drawText(QRectF(x0, y0, 600, 30), Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
-                   "%d a fazer   ·   %d em andamento   ·   %d concluídas      %s" % (tuple(n) + (getattr(self, "tasks_hint", "(clique num cartão para avançar)"),)))
+        if getattr(self, "_language", None) == "en-US":
+            summary = "%d to do   ·   %d in progress   ·   %d completed      %s"
+        else:
+            summary = "%d a fazer   ·   %d em andamento   ·   %d concluídas      %s"
+        hint = getattr(self, "tasks_hint", "(clique num cartão para avançar)")
+        p.drawText(
+            QRectF(x0, y0, 600, 30),
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+            summary % (tuple(n) + (hint,))
+        )
         bw, bh = 150, 30
         br = QRectF(x1 - bw, y0, bw, bh)
         hov = self._hover == ("task", "new")
@@ -902,10 +911,10 @@ class NovoVisual(HoloMixin, QWidget):
         p.fillPath(pb, qc(self.col, 0.95 if hov else 0.75))
         p.setFont(self.f_small)
         p.setPen(QColor(255, 255, 255, 255))
-        p.drawText(br, Qt.AlignmentFlag.AlignCenter, "+  NOVA TAREFA")
+        p.drawText(br, Qt.AlignmentFlag.AlignCenter, self._tr("+  NOVA TAREFA"))
         self._hit(br, self._new_task, ("task", "new"))
 
-        cols = (("A FAZER", 0, (130, 98, 255)), ("EM ANDAMENTO", 1, (255, 176, 64)), ("CONCLUÍDO", 2, (60, 255, 200)))
+        cols = ((self._tr("A FAZER"), 0, (130, 98, 255)), (self._tr("EM ANDAMENTO"), 1, (255, 176, 64)), (self._tr("CONCLUÍDO"), 2, (60, 255, 200)))
         gap = 16
         cw = (x1 - x0 - 2 * gap) / 3.0
         top = y0 + 44
@@ -954,11 +963,11 @@ class NovoVisual(HoloMixin, QWidget):
                 for li, ln in enumerate(wrap_lines(fh, t["t"], r.width() - 44, 2)):
                     p.drawText(QPointF(r.x() + 30, r.y() + 25 + li * fh.lineSpacing()), ln)
                 my = r.y() + 52
-                wch = self._chip(p, r.x() + 14, my, t["tag"], color)
+                wch = self._chip(p, r.x() + 14, my, self._tr(t["tag"]), color)
                 p.setFont(self.f_meta)
                 p.setPen(QColor(255, 255, 255, 120))
                 p.drawText(QRectF(r.x() + 14 + wch + 10, my, r.width() - wch - 40, 20),
-                           Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, t["due"])
+                           Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, self._tr(t["due"]))
                 if st == 1:
                     tr = QRectF(r.x() + 14, r.bottom() - 16, r.width() - 28, 5)
                     ptr = QPainterPath()
@@ -992,8 +1001,15 @@ class NovoVisual(HoloMixin, QWidget):
         n_on = sum(1 for r in self.routines if r["on"])
         p.setFont(self.f_body)
         p.setPen(QColor(255, 255, 255, 170))
-        p.drawText(QRectF(x0, y0, 700, 30), Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
-                   "%d rotinas ativas de %d      (clique no interruptor para ligar ou pausar)" % (n_on, len(self.routines)))
+        if getattr(self, "_language", None) == "en-US":
+            summary = "%d active routines out of %d      (click a switch to enable or pause)"
+        else:
+            summary = "%d rotinas ativas de %d      (clique no interruptor para ligar ou pausar)"
+        p.drawText(
+            QRectF(x0, y0, 700, 30),
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+            summary % (n_on, len(self.routines))
+        )
         rh, gap = 62.0, 10.0
         yy = y0 + 42
         for i, r in enumerate(self.routines[:(max(1, int((y1 - y0 - 112) / (rh + gap))) if getattr(self, "live", False) else len(self.routines))]):
@@ -1027,7 +1043,7 @@ class NovoVisual(HoloMixin, QWidget):
             p.setPen(QColor(255, 255, 255, int(130 * dim)))
             p.drawText(QRectF(nx, rect.y() + 33, rect.width() * 0.42, 18), Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, r["d"])
             sx_ = rect.x() + rect.width() * 0.50
-            wch = self._chip(p, sx_, rect.y() + 12, (r.get("chip") or sched_label(r["days"])), r["c"] if r["on"] else (140, 140, 160))
+            wch = self._chip(p, sx_, rect.y() + 12, self._tr(r.get("chip") or sched_label(r["days"])), r["c"] if r["on"] else (140, 140, 160))
             p.setFont(self.f_mono)
             p.setPen(QColor(255, 255, 255, int(200 * dim)))
             p.drawText(QRectF(sx_ + wch + 10, rect.y() + 12, 70, 20), Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
@@ -1036,11 +1052,11 @@ class NovoVisual(HoloMixin, QWidget):
             p.setPen(QColor(255, 255, 255, 110))
             p.drawText(QRectF(sx_, rect.y() + 36, rect.width() * 0.2, 18), Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
                        "última: " + r["last"])
-            nxt = (r.get("next") or next_run(r)) if r["on"] else "pausada"
+            nxt = self._tr(r.get("next") or next_run(r)) if r["on"] else self._tr("pausada")
             p.setFont(self.f_body)
             p.setPen(qc(self.acc, 0.95 if r["on"] else 0.35))
             p.drawText(QRectF(rect.right() - 230, rect.y(), 214, rh), Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
-                       ("próxima  " + nxt) if r["on"] else "pausada")
+                       (self._tr("próxima  ") + nxt) if r["on"] else self._tr("pausada"))
             yy += rh + gap
 
         # 24 h timeline
@@ -1055,7 +1071,7 @@ class NovoVisual(HoloMixin, QWidget):
         p.drawPath(pc)
         p.setFont(self.f_small)
         p.setPen(QColor(255, 255, 255, 120))
-        p.drawText(QRectF(x0 + 16, ty + 10, 300, 16), Qt.AlignmentFlag.AlignLeft, "HOJE · 24 HORAS")
+        p.drawText(QRectF(x0 + 16, ty + 10, 300, 16), Qt.AlignmentFlag.AlignLeft, self._tr("HOJE · 24 HORAS"))
         ax0, ax1 = x0 + 30, x1 - 30
         ay = ty + th - 28
         p.setPen(QPen(QColor(255, 255, 255, 40), 1))

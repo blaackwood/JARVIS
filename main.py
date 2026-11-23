@@ -612,7 +612,7 @@ TOOL_DECLARATIONS = [
             "Use when the user makes a project decision, reports progress, "
             "identifies a blocker, or defines the next step. Only save details "
             "explicitly established in the conversation; never invent progress. "
-            "Use concise Portuguese text."
+            "Use concise text in the user's selected JARVIS language."
         ),
         "parameters": {
             "type": "OBJECT",
@@ -653,7 +653,7 @@ TOOL_DECLARATIONS = [
             "reminders, searches or routine commands. Never store passwords, API keys, tokens, payment-card "
             "numbers, government identifiers, or sensitive health, political, religious or intimate "
             "information unless the user explicitly asks to remember that exact information. "
-            "Use concise Brazilian Portuguese (pt-BR). If the exact fact is already stored, silently skip it. "
+            "Use concise text in the user's selected JARVIS language. If the exact fact is already stored, silently skip it. "
             "If a near-duplicate exists under another key, do not ask about it during normal conversation. "
             "If the same key has a different value, overwrite only when the user's message clearly corrects "
             "or updates the old fact; otherwise preserve the old value and ask only if the conflict matters "
@@ -675,7 +675,7 @@ TOOL_DECLARATIONS = [
                     )
                 },
                 "key":   {"type": "STRING", "description": "Short snake_case key (e.g. name, favorite_food, sister_name)"},
-                "value": {"type": "STRING", "description": "Concise value in Brazilian Portuguese (pt-BR), unless it is a proper name"},
+                "value": {"type": "STRING", "description": "Concise value in the selected JARVIS language, unless it is a proper name"},
                 "confirm_overwrite": {"type": "BOOLEAN", "description": "Set true only after the user explicitly approves replacing the exact conflicting existing fact."},
                 "confirm_duplicate": {"type": "BOOLEAN", "description": "Set true only after the user explicitly approves storing a duplicate or near-duplicate as a separate fact."},
             },
@@ -2212,28 +2212,25 @@ class JarvisLive:
         # Address form is a property of the language being spoken, so it is
         # stated as a principle rather than a two-language lookup — the model
         # already knows the respectful register of whatever language it is in.
-        _addr = (
-            "ADDRESS: In Brazilian Portuguese, address the user as 'senhor' by default. "
-            "You may occasionally use the user's first name naturally, but never replace "
-            "'senhor' with a casual form of address. "
-            + (f"The configured first name is '{_user_name}'. " if _user_name else "")
-            + "Maintain a respectful, composed and consistently formal register."
-        )
+        from core.i18n import app_language, language_instruction, speech_language_code
+        _app_language = app_language()
+        if _app_language == "pt-BR":
+            _addr = (
+                "ADDRESS: In Brazilian Portuguese, address the user respectfully as 'senhor' by default. "
+                "Maintain a composed and considerate register. "
+                + (f"The configured first name is '{_user_name}'. " if _user_name else "")
+            )
+        else:
+            _addr = (
+                "ADDRESS: In English, use a respectful, composed and natural form of address. "
+                "Do not force honorifics into every sentence. "
+                + (f"The configured first name is '{_user_name}'. " if _user_name else "")
+            )
         identity_ctx = (
             f"[IDENTITY]\n"
             f"Your name is {self._asst_name}. "
             f"Always refer to yourself as {self._asst_name}.\n"
             f"{_addr}\n\n"
-            "[MANDATORY SPOKEN LANGUAGE - HIGHEST PRIORITY]\n"
-            "Speak ONLY Brazilian Portuguese (pt-BR). Use a natural Brazilian accent, "
-            "Brazilian pronunciation, vocabulary, grammar and everyday expressions. "
-            "NEVER speak with a European Portuguese (pt-PT) accent or use Portugal-specific "
-            "pronunciation, vocabulary, conjugations or expressions. Do not alternate "
-            "between Brazilian and European Portuguese. This rule applies to EVERY spoken "
-            "response: greetings, short acknowledgements, numbers, names, explanations, "
-            "tool narration, confirmations and error messages. Even when the user, a tool, "
-            "a document or a quoted source uses pt-PT, answer and speak in pt-BR. "
-            "If uncertain, choose unmistakably Brazilian Portuguese.\n\n"
         )
 
         # Everything the model is told about *itself* is derived here, not
@@ -2288,6 +2285,7 @@ class JarvisLive:
         if history_str:
             parts.append(history_str)
         parts.append(sys_prompt)
+        parts.append(language_instruction())
 
         cfg = dict(
             response_modalities=["AUDIO"],
@@ -2313,7 +2311,7 @@ class JarvisLive:
                 sliding_window=types.SlidingWindow(),
             ),
             speech_config=types.SpeechConfig(
-                language_code="pt-BR",
+                language_code=speech_language_code(),
                 voice_config=types.VoiceConfig(
                     prebuilt_voice_config=types.PrebuiltVoiceConfig(
                         voice_name=get_voice()
@@ -3756,21 +3754,13 @@ class JarvisLive:
 
         # ── Phase 1: instant greeting ─────────────────────────────────────────
         # The briefing fires before the user has said anything, so the
-        # remembered language is the only signal there is. It is a starting
-        # point, not a setting: the moment they reply, their language wins.
-        # The opening greeting is always Brazilian Portuguese and uses the
-        # user's preferred respectful form of address.
+        # persistent JARVIS language setting is the source of truth. The
+        # greeting uses the same locale as the interface and spoken responses.
         # Session summaries remain available in memory; do not recite them
         # automatically on every launch. The user can ask what happened last time.
         hour = datetime.now().hour  # local Windows time
-        greeting = ("Bom dia" if 5 <= hour < 12 else
-                    "Boa tarde" if 12 <= hour < 18 else "Boa noite")
-        p1 = (
-            f'Say exactly this one sentence in very formal, natural Brazilian Portuguese: '
-            f'"{greeting}, senhor. Permaneço à sua inteira disposição." '
-            "Address the user respectfully as senhor. Do not use casual language, "
-            "do not add another sentence, mention the time/date/news, or call tools."
-        )
+        from core.i18n import startup_greeting_prompt
+        p1 = startup_greeting_prompt(hour)
 
         # Clear the turn-done event so we can wait for Phase 1 to finish
         if self._turn_done_event:

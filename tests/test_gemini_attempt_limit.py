@@ -79,6 +79,42 @@ class GeminiSpeechTests(unittest.IsolatedAsyncioTestCase):
         with patch.object(gemini, "client", return_value=fake):
             self.assertEqual(await gemini.speech_pcm("Uma frase.", "Kore"), b"\x01\x00")
 
+    async def test_speech_uses_saved_pt_br_locale_for_voice_and_language(self):
+        from contextlib import asynccontextmanager
+        from types import SimpleNamespace
+        from unittest.mock import AsyncMock
+        from memory import config_manager
+
+        configs = []
+
+        async def receive():
+            yield SimpleNamespace(
+                data=b"\\x01\\x00",
+                server_content=SimpleNamespace(turn_complete=True),
+            )
+
+        @asynccontextmanager
+        async def connect(**kwargs):
+            configs.append(kwargs)
+            yield SimpleNamespace(send_client_content=AsyncMock(), receive=receive)
+
+        fake = SimpleNamespace(
+            aio=SimpleNamespace(
+                live=SimpleNamespace(connect=connect),
+                aclose=AsyncMock(),
+            )
+        )
+        with (
+            patch.object(config_manager, "load_api_keys", return_value={"app_language": "pt-BR"}),
+            patch.object(gemini, "client", return_value=fake),
+        ):
+            pcm = await gemini.speech_pcm("A onda se propaga.", "Kore")
+
+        self.assertEqual(pcm, b"\\x01\\x00")
+        config = configs[0]["config"]
+        self.assertEqual(config.speech_config.language_code, "pt-BR")
+        self.assertIn("Brazilian Portuguese", config.system_instruction)
+
     async def test_incomplete_speech_does_not_become_a_finished_beat(self):
         from contextlib import asynccontextmanager
         from types import SimpleNamespace

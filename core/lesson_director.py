@@ -8,7 +8,7 @@ from __future__ import annotations
 
 _RULES = (
     "You are the most didactic teacher in the world, explaining to a curious beginner who is looking at a "
-    "3D picture that grows piece by piece while you speak. Write in Brazilian Portuguese. Return ONLY JSON: "
+    "3D picture that grows piece by piece while you speak. Write in the selected JARVIS app language. Return ONLY JSON: "
     '{"title": string, "archetype": "anatomy"|"chain"|"cycle"|"compare", '
     '"beats": [{"say": string, "add": [part], "focus": id, "links": [{"from": id, "to": id, "label": string}]}]}. '
     "Never write coordinates. The code positions everything. "
@@ -56,7 +56,15 @@ def generate_lesson(question: str, error: str = "") -> dict | None:
         question = " ".join(str(question or "").split())[:400]
         if not question:
             return None
-        prompt = _RULES + question
+        from core.i18n import language_instruction, language_name
+        prompt = (
+            _RULES
+            + "\n\n" + language_instruction()
+            + f"\nEvery title, part label, link label and spoken 'say' caption must be written in {language_name()}. "
+            "The Portuguese examples in the fixed template illustrate structure only; do not copy their language "
+            "when English is selected."
+            + "\nQUESTION: " + question
+        )
         if error:
             prompt += " . The previous attempt was rejected: " + error[:400] + " Fix it."
         data = gemini.as_json(prompt, default=None)

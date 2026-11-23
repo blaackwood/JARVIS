@@ -522,19 +522,21 @@ class MainWindow(QMainWindow):
         self.on_hibernate = None
         self.get_active_tasks = None
         self._tray = QSystemTrayIcon(self)
-        self._tray.setToolTip(f"{_display} — ativo em segundo plano")
+        _tray_status = _tr("Ativo em segundo plano")
+        self._tray.setToolTip(f"{_display} — {_tray_status}")
         # Use the same JARVIS identity in the notification area.
         # An empty icon is preferable to the misleading generic computer icon.
         self._tray.setIcon(self._app_icon)
+        from core.i18n import tr as _tr
         self._tray_menu = QMenu(self)
-        self._tray_show_action = QAction("Abrir JARVIS", self)
+        self._tray_show_action = QAction(_tr("Abrir JARVIS"), self)
         self._tray_show_action.triggered.connect(self._restore_from_tray)
         self._tray_menu.addAction(self._tray_show_action)
-        self._tray_hibernate_action = QAction("Hibernar (Hey Jarvis)", self)
+        self._tray_hibernate_action = QAction(_tr("Hibernar (Hey Jarvis)"), self)
         self._tray_hibernate_action.triggered.connect(self._hibernate_from_tray)
         self._tray_menu.addAction(self._tray_hibernate_action)
         self._tray_menu.addSeparator()
-        self._tray_exit_action = QAction("Sair completamente", self)
+        self._tray_exit_action = QAction(_tr("Sair completamente"), self)
         self._tray_exit_action.triggered.connect(self._exit_from_tray)
         self._tray_menu.addAction(self._tray_exit_action)
         self._tray.setContextMenu(self._tray_menu)
@@ -3486,8 +3488,8 @@ class MainWindow(QMainWindow):
 
     def _apply_name_update(self, name: str, user_name: str, ui_color: str = "",
                            voice: str = "", engine_mode: str = "",
-                           gemini_api_key: str = ""):
-        """Update identity, appearance and the selected conversation engine."""
+                           gemini_api_key: str = "", app_language: str = ""):
+        """Update identity, appearance, app language and conversation engine."""
         self._assistant_name = name.strip() or "JARVIS"
         display = self._assistant_name.upper()
         self.setWindowTitle(f"{display} — {APP_VERSION}")
@@ -3557,6 +3559,24 @@ class MainWindow(QMainWindow):
                 save_voice(voice)
                 voice_changed = True
 
+        language_changed = False
+        if app_language:
+            try:
+                from memory.config_manager import get_app_language, save_app_language
+                if app_language != get_app_language():
+                    save_app_language(app_language)
+                    language_changed = True
+                    skin = getattr(self, "_holo_skin", None)
+                    if skin is not None and callable(getattr(skin, "set_language", None)):
+                        skin.set_language(app_language)
+                    from core.i18n import tr as _tr
+                    self._tray_show_action.setText(_tr("Abrir JARVIS", app_language))
+                    self._tray_hibernate_action.setText(_tr("Hibernar (Hey Jarvis)", app_language))
+                    _tray_status = _tr("Ativo em segundo plano", app_language)
+                    self._tray.setToolTip(f"{self._assistant_name.upper()} — {_tray_status}")
+            except Exception as exc:
+                self._log.append_log(f"ERR: Could not save JARVIS language - {type(exc).__name__}")
+
         try:
             from memory.config_manager import update_config
             fields = {"assistant_name": self._assistant_name, "user_name": user_name.strip()}
@@ -3575,9 +3595,13 @@ class MainWindow(QMainWindow):
 
         if engine_changed:
             self._log.append_log("SYS: Conversation engine changed — reconnecting. You can switch back here anytime.")
-            if self.on_audio_device_change:
+            if language_changed and self.on_voice_change:
+                # The language is baked into the Live session config; do not resume
+                # an old server session that may retain its previous locale.
+                self.on_voice_change()
+            elif self.on_audio_device_change:
                 self.on_audio_device_change()
-        elif (voice_changed or api_key_changed) and self.on_voice_change:
+        elif (voice_changed or language_changed or api_key_changed) and self.on_voice_change:
             if api_key_changed:
                 self._log.append_log("SYS: Reconnecting Gemini Live with the new API key.")
             self.on_voice_change()

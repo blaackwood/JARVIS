@@ -50,11 +50,13 @@ class LiveSkin(NovoVisual):
         self.setMinimumSize(0, 0)
         self.setAttribute(Qt.WidgetAttribute.WA_OpaquePaintEvent)
         self.win = win
+        from memory.config_manager import get_app_language
+        self._language = get_app_language()
         self.live = True
         self.auto = False
         self.name = (getattr(win, "_assistant_name", "JARVIS") or "JARVIS").upper()
         self.tasks, self.routines = [], []
-        self.tasks_hint = "(clique num cartão para ver os detalhes)"
+        self.tasks_hint = self._tr("(clique num cartão para ver os detalhes)")
         self.log = []
         self._workspace_open = False
         self.workspace = None
@@ -72,7 +74,7 @@ class LiveSkin(NovoVisual):
         self.edit = QLineEdit(self)
         self.edit.setFrame(False)
         self.edit.setFont(mk_font(11))
-        self.edit.setPlaceholderText("Fale com o Jarvis ou digite um comando...")
+        self.edit.setPlaceholderText(self._tr("Fale com o Jarvis ou digite um comando..."))
         self.edit.setStyleSheet(
             "QLineEdit{background:transparent;color:rgba(255,255,255,235);border:none;"
             "selection-background-color:rgba(130,98,255,140);}")
@@ -141,6 +143,24 @@ class LiveSkin(NovoVisual):
         w, h = self.width(), self.height()
         top, bottom = 76, 96
         self.workspace.setGeometry(18, top, max(120, w - 36), max(120, h - top - bottom))
+
+    def _tr(self, text):
+        from core.i18n import tr
+        from memory.config_manager import get_app_language
+        language = getattr(self, "_language", None) or get_app_language()
+        return tr(text, language)
+
+    def set_language(self, language: str) -> None:
+        """Update the live HUD, settings workspace and command affordances."""
+        from memory.config_manager import normalize_app_language
+        self._language = normalize_app_language(language)
+        self.edit.setPlaceholderText(self._tr("Fale com o Jarvis ou digite um comando..."))
+        self.tasks_hint = self._tr("(clique num cartão para ver os detalhes)")
+        self._cache_t = 0.0
+        if self.workspace is not None:
+            self.workspace.set_language(self._language)
+        self._refresh_live_quiz_locale()
+        self.update()
 
     def _goto(self, tab):
         if self._workspace_open and tab != "settings":
@@ -338,7 +358,8 @@ class LiveSkin(NovoVisual):
         self.quiz_count = QLabel("")
         self.quiz_count.setStyleSheet("color:#9c91d8;font:9pt 'Consolas';")
         head.addWidget(self.quiz_count)
-        close = QPushButton("FECHAR")
+        close = QPushButton(self._tr("FECHAR"))
+        self.quiz_close = close
         close.setObjectName("QuizClose")
         close.clicked.connect(self._close_live_quiz)
         head.addWidget(close)
@@ -358,7 +379,7 @@ class LiveSkin(NovoVisual):
         layout.addWidget(self.quiz_note)
         foot = QHBoxLayout()
         foot.addStretch(1)
-        self.quiz_next = QPushButton("PRÓXIMA  →")
+        self.quiz_next = QPushButton(self._tr("PRÓXIMA  →"))
         self.quiz_next.setObjectName("QuizPrimary")
         self.quiz_next.clicked.connect(self._next_live_quiz)
         self.quiz_next.hide()
@@ -396,6 +417,8 @@ class LiveSkin(NovoVisual):
             if child is not None:
                 child.deleteLater()
         self._quiz_answer_widgets = []
+        self.quiz_submit = None
+        self.quiz_input = None
 
     def _render_live_quiz(self):
         quiz = self.win._quiz
@@ -407,6 +430,10 @@ class LiveSkin(NovoVisual):
         self.quiz_question.setText(str(question.get("question", "")))
         self.quiz_note.clear()
         self.quiz_note.hide()
+        self._quiz_feedback_source = None
+        self._quiz_feedback_suffix = ""
+        self._quiz_feedback_note = ""
+        self._quiz_next_source = None
         self.quiz_next.hide()
         quiz["answered"] = False
         self._clear_live_quiz_answers()
@@ -424,8 +451,9 @@ class LiveSkin(NovoVisual):
             row_layout = QHBoxLayout(row)
             row_layout.setContentsMargins(0, 0, 0, 0)
             self.quiz_input = QLineEdit(row)
-            self.quiz_input.setPlaceholderText("Digite sua resposta...")
-            send = QPushButton("RESPONDER", row)
+            self.quiz_input.setPlaceholderText(self._tr("Digite sua resposta..."))
+            send = QPushButton(self._tr("RESPONDER"), row)
+            self.quiz_submit = send
             send.setObjectName("QuizPrimary")
             send.clicked.connect(lambda: self._submit_live_quiz(self.quiz_input.text()))
             self.quiz_input.returnPressed.connect(lambda: self._submit_live_quiz(self.quiz_input.text()))
@@ -446,11 +474,11 @@ class LiveSkin(NovoVisual):
         result = quiz["results"][-1]
         verdict = result.get("correct")
         if verdict is True:
-            mark, colour = "✓  Resposta correta", "#58edc4"
+            mark, colour = "✓  " + self._tr("Resposta correta"), "#58edc4"
         elif verdict is False:
             mark, colour = "✕  Resposta esperada: " + str(result.get("answer", "")), "#ff829d"
         else:
-            mark, colour = "…  Resposta registrada para revisão", "#ffc36e"
+            mark, colour = "…  " + self._tr("Resposta registrada para revisão"), "#ffc36e"
         note = quiz["questions"][quiz["i"]].get("note") or ""
         self.quiz_note.setText(mark + (("\n" + str(note)) if note else ""))
         self.quiz_note.setStyleSheet(f"color:{colour};background:transparent;font:10pt 'Segoe UI';")
@@ -458,8 +486,36 @@ class LiveSkin(NovoVisual):
         for widget in self._quiz_answer_widgets:
             widget.setEnabled(False)
         last = quiz["i"] >= len(quiz["questions"]) - 1
-        self.quiz_next.setText("FINALIZAR  →" if last else "PRÓXIMA  →")
+        self._quiz_next_source = "FINALIZAR  →" if last else "PRÓXIMA  →"
+        self.quiz_next.setText(self._tr(self._quiz_next_source))
         self.quiz_next.show()
+
+    def _refresh_live_quiz_locale(self):
+        close = getattr(self, "quiz_close", None)
+        if close is not None:
+            close.setText(self._tr("FECHAR"))
+        submit = getattr(self, "quiz_submit", None)
+        if submit is not None:
+            submit.setText(self._tr("RESPONDER"))
+        answer_input = getattr(self, "quiz_input", None)
+        if answer_input is not None:
+            answer_input.setPlaceholderText(self._tr("Digite sua resposta..."))
+        next_button = getattr(self, "quiz_next", None)
+        next_source = getattr(self, "_quiz_next_source", None)
+        if next_button is not None and next_source:
+            next_button.setText(self._tr(next_source))
+        feedback = getattr(self, "_quiz_feedback_source", None)
+        note = getattr(self, "quiz_note", None)
+        if feedback and note is not None:
+            mark = self._tr(feedback) + str(getattr(self, "_quiz_feedback_suffix", ""))
+            if feedback == "Resposta correta":
+                mark = "\u2713  " + mark
+            elif feedback == "Resposta esperada: ":
+                mark = "\u2715  " + mark
+            else:
+                mark = "\u2026  " + mark
+            extra = str(getattr(self, "_quiz_feedback_note", "") or "")
+            note.setText(mark + (("\\n" + extra) if extra else ""))
 
     def _next_live_quiz(self):
         quiz = self.win._quiz
@@ -502,14 +558,17 @@ class LiveSkin(NovoVisual):
 
     def open_news(self):
         """Run a real current-news request through JARVIS, never demo headlines."""
-        self.edit.setText(
-            "Busque e apresente as principais notícias atuais do Brasil e do mundo."
+        prompt = (
+            "Find and present the latest major news from the United States and around the world."
+            if self._language == "en-US"
+            else "Busque e apresente as principais notícias atuais do Brasil e do mundo."
         )
+        self.edit.setText(prompt)
         self._send()
 
     def open_search(self):
         """Prepare the live command field for a user-defined web search."""
-        self._focus_prompt("Pesquise na web: ")
+        self._focus_prompt("Search the web: " if self._language == "en-US" else "Pesquise na web: ")
 
     def _send(self):
         txt = self.edit.text().strip()
@@ -554,7 +613,7 @@ class LiveSkin(NovoVisual):
             return
         low = t.lower()
         if low.startswith("you:"):
-            t = "Você:" + t[4:]
+            t = ("You:" if self._language == "en-US" else "Você:") + t[4:]
         elif low.startswith("sys:"):
             t = t[4:].strip()
         self._note(t)
@@ -607,7 +666,7 @@ class LiveSkin(NovoVisual):
             self.win._content_panel.hide()
             self._text_panel(kind, txt)
         except Exception as ex:
-            self._note("Detalhe indisponível: %s" % ex)
+            self._note(self._tr("Detalhe indisponível: ") + str(ex))
 
     def _poll_real(self):
         # tarefas
@@ -630,7 +689,7 @@ class LiveSkin(NovoVisual):
             mins = (t.get("budget") or {}).get("minutes") or 0
             pg = 1.0 if col == 2 else (min(1.0, (used / 60.0) / mins) if mins else 0.0)
             tasks.append({"id": t.get("id"), "t": str(t.get("title") or "Tarefa"),
-                          "tag": "Falhou" if stt == "failed" else "Tarefa",
+                          "tag": ("Failed" if self._language == "en-US" else "Falhou") if stt == "failed" else ("Task" if self._language == "en-US" else "Tarefa"),
                           "due": stt.replace("_", " ") + (" · %.1f/%s min" % (used / 60.0, mins) if mins else ""),
                           "pr": 2 if stt == "failed" else (1 if col == 1 else 0), "st": col, "pg": pg})
         done = [t for t in tasks if t["st"] == 2][:8]
@@ -647,7 +706,7 @@ class LiveSkin(NovoVisual):
             trig = r.get("trigger") or {}
             nt = r.get("next_ts")
             h = m = None
-            chip = "Evento"
+            chip = "Event" if self._language == "en-US" else "Evento"
             days = list(range(7))
             ttype = trig.get("type")
             if ttype == "time":
@@ -667,15 +726,15 @@ class LiveSkin(NovoVisual):
                 if h is not None:
                     chip = _pv.sched_label(days) if rt == "weekly" else "Mensal"
                 elif rt == "interval":
-                    chip = "A cada %s min" % rule.get("minutes", "?")
+                    chip = ("Every %s min" if self._language == "en-US" else "A cada %s min") % rule.get("minutes", "?")
                 if h is None and rt != "interval" and nt:
                     lt = time.localtime(nt)
                     h, m = lt.tm_hour, lt.tm_min
-                    chip = "Uma vez"
+                    chip = "Once" if self._language == "en-US" else "Uma vez"
             elif ttype == "startup":
-                chip = "Ao abrir"
+                chip = "At startup" if self._language == "en-US" else "Ao abrir"
             elif ttype == "idle":
-                chip = "Ocioso %s min" % trig.get("minutes", "?")
+                chip = (("Idle %s min" if self._language == "en-US" else "Ocioso %s min") % trig.get("minutes", "?"))
             try:
                 desc = eng.describe(r)
             except Exception:
@@ -684,7 +743,11 @@ class LiveSkin(NovoVisual):
             last = ("ok · " + time.strftime("%d/%m %H:%M", time.localtime(lr))) if lr else "nunca rodou"
             if r.get("enabled") and nt:
                 lt = time.localtime(nt)
-                nxt = "%s %02d:%02d" % (DAYN[lt.tm_wday].lower(), lt.tm_hour, lt.tm_min)
+                day_names = (
+                    ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+                    if self._language == "en-US" else DAYN
+                )
+                nxt = "%s %02d:%02d" % (day_names[lt.tm_wday].lower(), lt.tm_hour, lt.tm_min)
             else:
                 nxt = "-"
             routines.append({"id": r.get("id"), "n": str(r.get("name") or "Rotina"), "d": desc[:90],
@@ -710,12 +773,12 @@ class LiveSkin(NovoVisual):
         try:
             self.win._toggle_routine(r["id"], not r["on"])
         except Exception as ex:
-            self._note("Rotina não alterada: %s" % ex)
+            self._note(self._tr("Rotina não alterada: ") + str(ex))
         self._poll_t = 99.0
 
     def _new_task(self):
         self._goto("home")
-        self._focus_prompt("Crie uma tarefa em segundo plano: ")
+        self._focus_prompt("Create a background task: " if self._language == "en-US" else "Crie uma tarefa em segundo plano: ")
 
     # ------------------------------------------------------------ actions
     def _safe(self, fn):
@@ -723,7 +786,7 @@ class LiveSkin(NovoVisual):
             try:
                 fn()
             except Exception as ex:
-                self._note("Falhou: %s" % ex)
+                self._note(self._tr("Falhou: ") + str(ex))
             self._cache_t = 0.0
         return run
 
@@ -741,7 +804,7 @@ class LiveSkin(NovoVisual):
         if st["wake_ready"] and st["wake"]:
             self._safe(self.win._tap_wake_manual)()
         else:
-            self._note("Ligue a palavra de ativação para usar o modo de espera.")
+            self._note(self._tr("Ligue a palavra de ativação para usar o modo de espera."))
 
     # ----------------------------------------------------- real states
     def _real_flags(self):

@@ -15,6 +15,7 @@ htmlcov/
 **/.env
 **/.env.*
 config/api_keys.json*
+config/protected_projects.json
 config/*.broken-*
 **/*.pem
 **/*.key
